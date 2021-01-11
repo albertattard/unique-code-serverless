@@ -29,7 +29,9 @@ entities within an application. The serverless application features the followin
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
-   The above profile has teh following policy
+   The above profile has the following policy.
+
+   **TODO: the following policy needs to be restricted further as it is too permissive!!**
 
    ```json
    {
@@ -38,7 +40,25 @@ entities within an application. The serverless application features the followin
        {
          "Sid": "DemoDynamoDbFullAccess",
          "Effect": "Allow",
-         "Action": "dynamodb:*",
+         "Action": ["dynamodb:*"],
+         "Resource": "*"
+       },
+       {
+         "Sid": "DemoIamFullAccessIam",
+         "Effect": "Allow",
+         "Action": ["iam:*"],
+         "Resource": "*"
+       },
+       {
+         "Sid": "DemoLambdaFullAccessLambda",
+         "Effect": "Allow",
+         "Action": ["lambda:*"],
+         "Resource": "*"
+       },
+       {
+         "Sid": "DemoLogsFullAccessLogs",
+         "Effect": "Allow",
+         "Action": ["logs:*"],
          "Resource": "*"
        }
      ]
@@ -72,10 +92,10 @@ entities within an application. The serverless application features the followin
    Apply the changes
 
    ```bash
-   $ terraform fmt -recursive && terraform apply
+   $ terraform apply
    ```
 
-   The following error may appear when applying the changes again.
+   The following error may appear when applying the changes for a subsequent time, due to a known problem.
 
    ```text
    Error: error updating DynamoDB Table (UniqueCodes) time to live: error updating DynamoDB Table (UniqueCodes) Time To Live: ValidationException: TimeToLive is already disabled
@@ -84,9 +104,11 @@ entities within an application. The serverless application features the followin
 
    This seems to be a known issue and nothing to worry about ([reference](https://github.com/hashicorp/terraform-provider-aws/issues/10304)).
 
-1. Test Lambda
+1. Configure the Lambda test event
 
-   Template: _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`)
+   Create a test template, if one does not already exist.
+
+   Select the _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`) template and update it as shown next. No need to modify the `headers`.
 
    ```json
    {
@@ -174,13 +196,35 @@ entities within an application. The serverless application features the followin
    }
    ```
 
+   ![Configure Lambda test event](assets/images/Configure-Lambda-Test-Event.png)
+
+1. Run the Lambda test
+
+   The first time Lambda is execute will take about 10 seconds as the Lambda function is being prepared.
+
+   ![Successful Initial Lambda Test](assets/images/Successful-Initial-Lambda-Test.png)
+
+   Subsequent tests will run faster.
+
+   ![Successful Subsequent Lambda Test](assets/images/Successful-Subsequent-Lambda-Test.png)
+
+   There can be cases where the lambda function fails to run, such as
+
    ```text
    Calling the invoke API action failed with this message: Lambda was unable to decrypt the environment variables because KMS access was denied. Please check the function's KMS key settings. KMS Exception: UnrecognizedClientExceptionKMS Message: The security token included in the request is invalid.
    ```
 
+   or
+
    ```text
    Calling the invoke API action failed with this message: The role defined for the function cannot be assumed by Lambda.
    ```
+
+   I never got to the bottom of this, but usually works when I modify the code slightly and redeploy.
+
+1. View the data in DynamoDB
+
+   ![UniqueCodes DynamoDb Table](assets/images/UniqueCodes-DynamoDb-Table.png)
 
 ## Performance
 

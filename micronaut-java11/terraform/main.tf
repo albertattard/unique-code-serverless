@@ -1,6 +1,4 @@
-data "aws_caller_identity" "current" {}
-
-resource "aws_dynamodb_table" "UniqueCodes" {
+resource "aws_dynamodb_table" "unique_code" {
   name           = "UniqueCodes"
   billing_mode   = "PROVISIONED"
   read_capacity  = 3
@@ -18,13 +16,14 @@ resource "aws_dynamodb_table" "UniqueCodes" {
   }
 
   tags = {
-    Name = "Demo - Unique Codes"
+    Name = "Demo - Unique Codes Serverless Application"
     Demo = "true"
   }
 }
 
-resource "aws_iam_role" "UniqueCodesLambda" {
-  name = "unique_code"
+resource "aws_iam_role" "unique_code" {
+  name        = "DemoUniqueCodeLambdaFunction"
+  description = "The role that is assumed by the Unique Code Lambda function"
 
   assume_role_policy = <<EOF
 {
@@ -35,19 +34,18 @@ resource "aws_iam_role" "UniqueCodesLambda" {
       "Principal": {
         "Service": "lambda.amazonaws.com"
       },
-      "Effect": "Allow",
-      "Sid": ""
+      "Effect": "Allow"
     }
   ]
 }
 EOF
 }
 
-resource "aws_lambda_function" "UniqueCodesLambda" {
+resource "aws_lambda_function" "unique_code" {
   filename         = var.lambda_zip_file
-  function_name    = "unique_code"
+  function_name    = var.lambda_function_name
   description      = "Demo lambda function that generates a random, yet unique code of a given length"
-  role             = aws_iam_role.UniqueCodesLambda.arn
+  role             = aws_iam_role.unique_code.arn
   handler          = "io.micronaut.function.aws.proxy.MicronautLambdaHandler"
   source_code_hash = filebase64sha256(var.lambda_zip_file)
 
@@ -57,21 +55,31 @@ resource "aws_lambda_function" "UniqueCodesLambda" {
 
   environment {
     variables = {
-      NAME = "Demo - Unique Codes"
+      NAME = "Demo - Unique Codes Serverless Application"
       DEMO = "true"
     }
   }
 
   tags = {
-    Name = "Demo - Unique Codes"
+    Name = "Demo - Unique Codes Serverless Application"
     Demo = "true"
   }
 }
 
-resource "aws_iam_policy" "lab_lambda_logging" {
-  name        = "unique_code_logging"
+resource "aws_cloudwatch_log_group" "unique_code" {
+  name              = "/aws/lambda/${var.lambda_function_name}"
+  retention_in_days = 1
+
+  tags = {
+    Name = "Demo - Unique Codes Serverless Application"
+    Demo = "true"
+  }
+}
+
+resource "aws_iam_policy" "unique_code" {
+  name        = "DemoUniqueCodeLambdaFunctionRestrictedAccess"
   path        = "/"
-  description = "Enable the lambda function to write logs in CloudWatch"
+  description = "Enable the Unique Code lambda function to write logs in CloudWatch and put items to DynamoDB"
 
   policy = <<EOF
 {
@@ -84,40 +92,21 @@ resource "aws_iam_policy" "lab_lambda_logging" {
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:eu-central-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.UniqueCodesLambda.function_name}:*"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "lab_lambda_logging_policy_attachment" {
-  role       = aws_iam_role.UniqueCodesLambda.name
-  policy_arn = aws_iam_policy.lab_lambda_logging.arn
-}
-
-resource "aws_iam_policy" "UniqueCode_lambda_DynamoDB_policy" {
-  name        = "unique_code_dynamodb"
-  path        = "/"
-  description = "Enable the lambda function to access DynamoDB"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+      "Resource": "${aws_cloudwatch_log_group.unique_code.arn}:*"
+    },
     {
       "Effect": "Allow",
       "Action": [
-        "dynamoDb:PutItem"
+        "dynamodb:PutItem"
       ],
-      "Resource": "arn:aws:dynamodb:eu-central-1:${data.aws_caller_identity.current.account_id}:table/${aws_dynamodb_table.UniqueCodes.name}"
+      "Resource": "${aws_dynamodb_table.unique_code.arn}"
     }
   ]
 }
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "UniqueCode_lambda_DynamoDB_policy_attachment" {
-  role       = aws_iam_role.UniqueCodesLambda.name
-  policy_arn = aws_iam_policy.UniqueCode_lambda_DynamoDB_policy.arn
+resource "aws_iam_role_policy_attachment" "unique_code" {
+  role       = aws_iam_role.unique_code.name
+  policy_arn = aws_iam_policy.unique_code.arn
 }
