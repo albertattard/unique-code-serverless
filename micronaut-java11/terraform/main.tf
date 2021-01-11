@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_dynamodb_table" "UniqueCodes" {
   name           = "UniqueCodes"
   billing_mode   = "PROVISIONED"
@@ -20,7 +22,6 @@ resource "aws_dynamodb_table" "UniqueCodes" {
     Demo = "true"
   }
 }
-
 
 resource "aws_iam_role" "UniqueCodesLambda" {
   name = "unique_code"
@@ -83,7 +84,7 @@ resource "aws_iam_policy" "lab_lambda_logging" {
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:*"
+      "Resource": "arn:aws:logs:eu-central-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.UniqueCodesLambda.function_name}:*"
     }
   ]
 }
@@ -107,9 +108,9 @@ resource "aws_iam_policy" "UniqueCode_lambda_DynamoDB_policy" {
     {
       "Effect": "Allow",
       "Action": [
-        "dynamoDb:*"
+        "dynamoDb:PutItem"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:dynamodb:eu-central-1:${data.aws_caller_identity.current.account_id}:table/${aws_dynamodb_table.UniqueCodes.name}"
     }
   ]
 }
