@@ -29,9 +29,7 @@ entities within an application. The serverless application features the followin
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
-   The above profile has the following policy.
-
-   **TODO: the following policy needs to be restricted further as it is too permissive!!**
+   The above profile only has the following policy attached.
 
    ```json
    {
@@ -41,29 +39,45 @@ entities within an application. The serverless application features the followin
          "Sid": "DemoDynamoDbFullAccess",
          "Effect": "Allow",
          "Action": ["dynamodb:*"],
-         "Resource": "*"
+         "Resource": "arn:aws:dynamodb:eu-central-1:000000000000:table/UniqueCodes"
        },
        {
-         "Sid": "DemoIamFullAccessIam",
+         "Sid": "DemoIamFullAccessIamRole",
          "Effect": "Allow",
          "Action": ["iam:*"],
-         "Resource": "*"
+         "Resource": "arn:aws:iam::000000000000:role/DemoUniqueCodeLambdaFunction"
+       },
+       {
+         "Sid": "DemoIamFullAccessIamPolicy",
+         "Effect": "Allow",
+         "Action": ["iam:*"],
+         "Resource": "arn:aws:iam::000000000000:policy/DemoUniqueCodeLambdaFunctionRestrictedAccess"
        },
        {
          "Sid": "DemoLambdaFullAccessLambda",
          "Effect": "Allow",
          "Action": ["lambda:*"],
-         "Resource": "*"
+         "Resource": "arn:aws:lambda:eu-central-1:000000000000:function:unique_code"
        },
        {
          "Sid": "DemoLogsFullAccessLogs",
          "Effect": "Allow",
          "Action": ["logs:*"],
-         "Resource": "*"
+         "Resource": "arn:aws:logs:eu-central-1:000000000000:log-group:/aws/lambda/unique_code:*"
+       },
+       {
+         "Sid": "DemoLogsRestrictiveAccessLogs",
+         "Effect": "Allow",
+         "Action": ["logs:DescribeLogGroups"],
+         "Resource": "arn:aws:logs:eu-central-1:000000000000:log-group::log-stream:"
        }
      ]
    }
    ```
+
+   Please note that the account id is masked `000000000000` and needs to be replaced by a valid account id.
+
+   The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's beyond the scope of this demo.
 
 1. Verify access to AWS console
 
@@ -200,7 +214,7 @@ entities within an application. The serverless application features the followin
 
 1. Run the Lambda test
 
-   The first time Lambda is execute will take about 10 seconds as the Lambda function is being prepared.
+   The first time Lambda is executed will take about 10 seconds as the Lambda function is being prepared.
 
    ![Successful Initial Lambda Test](assets/images/Successful-Initial-Lambda-Test.png)
 
