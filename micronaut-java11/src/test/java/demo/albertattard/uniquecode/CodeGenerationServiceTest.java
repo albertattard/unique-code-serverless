@@ -15,11 +15,12 @@ class CodeGenerationServiceTest {
     @Test
     @DisplayName("should return a string of the given length containing only uppercase letters and numbers")
     void shouldReturnAStringOfTheGivenLengthContainingOnlyUppercaseLettersAndNumbers() {
-        final String code = service.generate(8);
+        final int length = 128;
+        final String code = service.generate(length);
         assertThat(code)
-                .describedAs("Code must contains a mix of 8 capital letters and numbers only")
+                .describedAs("Code must contains a mix of %d capital letters and numbers only", length)
                 .isNotNull()
-                .matches("[A-Z0-9]{8}");
+                .matches("[A-Z0-9]{" + length + "}");
     }
 
     @Test
