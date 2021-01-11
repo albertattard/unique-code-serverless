@@ -23,8 +23,6 @@ Still need to setup integration tests.
 
 ## Commands
 
-Need to be updated.
-
 1. Build application
 
    ```bash
