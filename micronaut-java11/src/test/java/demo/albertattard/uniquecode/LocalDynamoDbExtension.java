@@ -9,11 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.SystemPropertyCredentialsProvider;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ReturnConsumedCapacity;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallback {
@@ -37,6 +41,7 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         setupPropertiesNeededByAwsApi();
         startLocalDynamoDBServer();
         createTable();
+        populateTableWithDummyValues();
     }
 
     private void startLocalDynamoDBServer() throws Exception {
@@ -78,6 +83,23 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
                                 .keySchema(b -> b.attributeName("Code").keyType(KeyType.HASH))
                                 .billingMode(BillingMode.PROVISIONED)
                                 .provisionedThroughput(b -> b.readCapacityUnits(3L).writeCapacityUnits(3L))
+                )
+        );
+    }
+
+    public void populateTableWithDummyValues() {
+        LOGGER.debug("Populating DynamoDB table");
+
+        final Map<String, AttributeValue> item = new HashMap<>();
+        item.put("Code", AttributeValue.builder().s("12345678").build());
+
+        withClient(client ->
+                client.putItem(builder -> builder
+                        .tableName("UniqueCodes")
+                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
+                        .item(item)
+                        .conditionExpression("attribute_not_exists(Code)")
+                        .build()
                 )
         );
     }

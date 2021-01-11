@@ -28,10 +28,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
-    /* Random String Generator */
-    def apacheCommonsVersion = "3.11"
-    implementation("org.apache.commons:commons-lang3:${apacheCommonsVersion}")
-
     /* DynamoDB */
     def dynamoDbVersion = "2.15.61"
     def dynamoDbLocalVersion = "1.13.5"

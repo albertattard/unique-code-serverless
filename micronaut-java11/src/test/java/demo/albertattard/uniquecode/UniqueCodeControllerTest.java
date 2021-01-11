@@ -34,6 +34,13 @@ class UniqueCodeControllerTest {
     private static MicronautLambdaHandler handler;
     private static ObjectMapper objectMapper;
 
+    /*
+     * TODO: Cannot mock the services as yet, as @MicronautTest is incomplete.
+     *  Reference: https://github.com/micronaut-projects/micronaut-test/issues/330
+     */
+    // @Inject
+    // CodeGenerationService codeGenerationService;
+
     @BeforeAll
     public static void setupSpec() {
         try {
@@ -56,6 +63,9 @@ class UniqueCodeControllerTest {
     void shouldReturnANewRandomCodeWithDefaultLengthWhenABlankRequestIsMade() throws JsonProcessingException {
         final String json = objectMapper.writeValueAsString(new CreateUniqueCodeRequest());
 
+        // final String expectedCode = "12345678";
+        // when(codeGenerationService.generate(CreateUniqueCodeRequest.DEFAULT_LENGTH)).thenReturn(expectedCode);
+
         final AwsProxyRequest request = new AwsProxyRequestBuilder("/", HttpMethod.POST.toString())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .body(json)
@@ -70,8 +80,17 @@ class UniqueCodeControllerTest {
 
         final String code = uniqueCode.getCode();
         assertThat(code)
-                .describedAs("Code must contains %d capital letters and numbers only", CreateUniqueCodeRequest.DEFAULT_LENGTH)
+                // .isEqualTo(expectedCode)
+                .describedAs("Code must contains a mix of %d capital letters and numbers only", CreateUniqueCodeRequest.DEFAULT_LENGTH)
                 .isNotNull()
-                .matches("[A-Z0-9]{" + CreateUniqueCodeRequest.DEFAULT_LENGTH + "}");
+                .matches("[A-Z0-9]{" + CreateUniqueCodeRequest.DEFAULT_LENGTH + "}")
+        ;
+
+        // verify(codeGenerationService).generate(CreateUniqueCodeRequest.DEFAULT_LENGTH);
     }
+
+    // @MockBean(RandomCodeGenerationService.class)
+    // CodeGenerationService codeGenerationService() {
+    //     return mock(CodeGenerationService.class);
+    // }
 }
