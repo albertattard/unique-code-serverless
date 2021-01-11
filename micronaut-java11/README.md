@@ -184,50 +184,10 @@ entities within an application. The serverless application features the followin
 
 ## Performance
 
-First request
-
-| Measurement          |      Value |
-| -------------------- | ---------: |
-| Init duration        | 4790.86 ms |
-| Duration             | 5816.10 ms |
-| Billed duration      | 5817.00 ms |
-| Resources configured |     512 MB |
-| Max memory used      |     211 MB |
-
-Subsequent requests
-
-1. Second request
-
-   | Measurement          |     Value |
-   | -------------------- | --------: |
-   | Duration             | 533.54 ms |
-   | Billed duration      | 534.00 ms |
-   | Resources configured |    512 MB |
-   | Max memory used      |    212 MB |
-
-1. Third request
-
-   | Measurement          |     Value |
-   | -------------------- | --------: |
-   | Duration             | 172.37 ms |
-   | Billed duration      | 173.00 ms |
-   | Resources configured |    512 MB |
-   | Max memory used      |    212 MB |
-
-1. Fourth request
-
-   | Measurement          |    Value |
-   | -------------------- | -------: |
-   | Duration             | 87.03 ms |
-   | Billed duration      | 88.00 ms |
-   | Resources configured |   512 MB |
-   | Max memory used      |   213 MB |
-
-1. Fifth request
-
-   | Measurement          |    Value |
-   | -------------------- | -------: |
-   | Duration             | 89.08 ms |
-   | Billed duration      | 90.00 ms |
-   | Resources configured |   512 MB |
-   | Max memory used      |   213 MB |
+| Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
+| -------------------- | ----------: | ----------: | ----------: | ----------: | ----------: |
+| Init duration        |  4790.86 ms |           - |           - |           - |           - |
+| Duration             |  5816.10 ms |   533.54 ms |   172.37 ms |    87.03 ms |    89.08 ms |
+| Billed duration      |  5817.00 ms |   534.00 ms |   173.00 ms |    88.00 ms |    90.00 ms |
+| Resources configured |      512 MB |      512 MB |      512 MB |      512 MB |      512 MB |
+| Max memory used      |      211 MB |      212 MB |      212 MB |      213 MB |      213 MB |
