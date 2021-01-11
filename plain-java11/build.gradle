@@ -1,0 +1,55 @@
+plugins {
+    id("java")
+    id("com.github.johnrengelman.shadow") version("6.1.0")
+    id("com.dorongold.task-tree") version("1.5")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    /* Lombok */
+    def lombokVersion = "1.18.16"
+    compileOnly("org.projectlombok:lombok:${lombokVersion}")
+    annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+
+    /* DynamoDB */
+    def dynamoDbVersion = "2.15.61"
+    implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
+    implementation("software.amazon.awssdk:url-connection-client:${dynamoDbVersion}")
+
+    /* Lambda */
+    def lambdaVersion = "1.2.1"
+    implementation("com.amazonaws:aws-lambda-java-core:${lambdaVersion}")
+
+    /* Logging */
+    def logbackVersion = "1.2.3"
+    runtimeOnly("ch.qos.logback:logback-classic:${logbackVersion}")
+
+    /* Testing */
+    def junitVersion = "5.7.0"
+    def assertJVersion = "3.18.1"
+    def mockitoVersion = "3.7.0"
+    testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+    testImplementation("org.assertj:assertj-core:${assertJVersion}")
+    testImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events = ['FAILED', 'PASSED', 'SKIPPED', 'STANDARD_OUT']
+    }
+}
+
+shadowJar {
+    mergeServiceFiles()
+}

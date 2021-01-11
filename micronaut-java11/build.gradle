@@ -33,6 +33,7 @@ dependencies {
     def dynamoDbLocalVersion = "1.13.5"
     implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
     testImplementation("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
+    testImplementation("software.amazon.awssdk:url-connection-client:${dynamoDbVersion}")
     dynamodb(fileTree(dir: "lib", include: ["*.dylib", "*.so", "*.dll"]))
     dynamodb("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
 
@@ -67,6 +68,9 @@ task copyNativeDeps(type: Copy) {
 test {
     classpath += configurations.developmentOnly
     useJUnitPlatform()
+    testLogging {
+        events = ['FAILED', 'PASSED', 'SKIPPED', 'STANDARD_OUT']
+    }
     dependsOn copyNativeDeps
     doFirst {
         systemProperty "java.library.path", "build/libs"

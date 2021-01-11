@@ -5,21 +5,25 @@ entities within an application. The serverless application features the followin
 
 1. Java 11
 1. Gradle
-1. Micronaut Framework
 1. AWS Lambda Functions
 1. DynamoDB
 1. LocalDynamoDb (for testing)
 
+**Note that this demo does not use any frameworks**.
+
 ## Conclusion
 
-I was not able to test the Lambda function and also mock the services due to a known limitation ([reference](https://github.com/micronaut-projects/micronaut-test/issues/330)).
+Pending
+
+Still need to setup integration tests.
 
 ## Useful resources
 
-- [https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambda](https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambda) ([source](https://github.com/micronaut-guides/mn-application-aws-lambda-java11/tree/master/complete))
-- [https://byegor.github.io/2020/04/10/micronaut-dynamodb-async.html](https://byegor.github.io/2020/04/10/micronaut-dynamodb-async.html)
+- [https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html](https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html)
 
 ## Commands
+
+Need to be updated.
 
 1. Build application
 
@@ -263,7 +267,7 @@ I was not able to test the Lambda function and also mock the services due to a k
 | Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
 | -------------------- | ----------: | ----------: | ----------: | ----------: | ----------: |
 | Init duration        |  4790.86 ms |           - |           - |           - |           - |
-| Duration             |  5816.10 ms |   533.54 ms |   172.37 ms |    87.03 ms |    89.08 ms |
-| Billed duration      |  5817.00 ms |   534.00 ms |   173.00 ms |    88.00 ms |    90.00 ms |
+| Duration             |  5816.10 ms |   558.67 ms |   265.77 ms |    67.72 ms |   108.70 ms |
+| Billed duration      |  5817.00 ms |   559.00 ms |   266.00 ms |    69.00 ms |   109.00 ms |
 | Resources configured |      512 MB |      512 MB |      512 MB |      512 MB |      512 MB |
-| Max memory used      |      211 MB |      212 MB |      212 MB |      213 MB |      213 MB |
+| Max memory used      |      211 MB |      149 MB |      149 MB |      149 MB |      149 MB |
