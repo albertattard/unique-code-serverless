@@ -240,6 +240,16 @@ entities within an application. The serverless application features the followin
 
    ![UniqueCodes DynamoDb Table](assets/images/UniqueCodes-DynamoDb-Table.png)
 
+1. Cleanup resources from AWS
+
+   When done, it is a good idea to delete any resources from AWS that are not required any more.
+
+   ```bash
+   $ terraform destroy
+   ```
+
+   Once completed, double check through the AWS console to make sure that all the resources, including the logs were deleted.
+
 ## Performance
 
 | Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
