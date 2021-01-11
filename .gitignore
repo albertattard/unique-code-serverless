@@ -1,7 +1,11 @@
 # IDE/Build
 .gradle
 .idea
+.settings
 build
+bin
+.classpath
+.project
 
 # Terraform files
 .terraform

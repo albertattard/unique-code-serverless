@@ -31,13 +31,14 @@ public class UniqueCodeController {
 
         for (int attempt = 1, limit = 5; attempt <= limit; attempt++) {
             LOGGER.debug("Creating unique code (Attempt {} of {})", attempt, limit);
-            final String random = codeGenerationService.generate(request.getLength());
-            item.put("Code", AttributeValue.builder().s(random).build());
+
+            final String randomCode = codeGenerationService.generate(request.getLength());
+            item.put("Code", AttributeValue.builder().s(randomCode).build());
 
             boolean successful = saveUniqueCode(item);
             if (successful) {
-                LOGGER.debug("Unique code generated {} after {} attempt of {}", random, attempt, limit);
-                return new UniqueCode(random);
+                LOGGER.debug("Unique code generated {} after {} attempt of {}", randomCode, attempt, limit);
+                return new UniqueCode(randomCode);
             }
 
             LOGGER.warn("Failed to create a unique code (Attempt {} of {})", attempt, limit);
