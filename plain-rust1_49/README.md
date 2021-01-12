@@ -9,6 +9,8 @@ entities within an application. The serverless application features the followin
 
 **Note that this demo does not use any frameworks**.
 
+I have no Rust skills and the code shown here can be improved. Please don't use as is.
+
 ## Conclusion
 
 Pending
