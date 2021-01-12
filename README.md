@@ -4,7 +4,7 @@ A serverless application that uses AWS Lambda Functions and DynamoDB to create u
 
 The scope of the project is to create the same serverless application using different technologies and compare them. Following is a list of technologies used (or will be using).
 
-1. [Plain Java 11 (no frameworks)][plain-java11]
+1. [Plain Java 11 (no frameworks)](plain-java11)
 1. [Micronaut with Java 11](micronaut-java11)
 1. Micronaut with GraalVM (coming soon)
 1. Quarkus with GraalVM (coming soon)
