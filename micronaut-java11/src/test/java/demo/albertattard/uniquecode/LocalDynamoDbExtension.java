@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.SystemPropertyCredentialsProvider;
-import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
@@ -109,7 +108,6 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         final DynamoDbClient client = DynamoDbClient.builder()
                 .endpointOverride(endpoint)
                 .credentialsProvider(SystemPropertyCredentialsProvider.create())
-                .httpClient(UrlConnectionHttpClient.builder().build())
                 .build();
         consumer.accept(client);
     }

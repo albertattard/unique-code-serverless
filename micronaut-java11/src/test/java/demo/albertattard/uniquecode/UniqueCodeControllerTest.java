@@ -47,7 +47,7 @@ class UniqueCodeControllerTest {
             handler = new MicronautLambdaHandler();
             objectMapper = handler.getApplicationContext().getBean(ObjectMapper.class);
         } catch (ContainerInitializationException e) {
-            LOGGER.error("Failed to initialise the container", e);
+            throw new RuntimeException("Failed to initialise the container", e);
         }
     }
 
