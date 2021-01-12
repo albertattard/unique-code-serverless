@@ -49,9 +49,9 @@ resource "aws_lambda_function" "unique_code" {
   handler          = "demo.albertattard.uniquecode.UniqueCodeController::handleRequest"
   source_code_hash = filebase64sha256(var.lambda_zip_file)
 
-  runtime     = "java11"
-  memory_size = 512
-  timeout     = 15
+  runtime     = var.lambda_runtime
+  memory_size = var.lambda_memory_size
+  timeout     = var.lambda_timeout
 
   environment {
     variables = {

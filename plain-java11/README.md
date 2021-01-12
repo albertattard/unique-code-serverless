@@ -7,7 +7,6 @@ entities within an application. The serverless application features the followin
 1. Gradle
 1. AWS Lambda Functions
 1. DynamoDB
-1. LocalDynamoDb (for testing)
 
 **Note that this demo does not use any frameworks**.
 
