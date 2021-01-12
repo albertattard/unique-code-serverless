@@ -10,6 +10,6 @@ The scope of the project is to create the same serverless application using diff
 1. Quarkus with GraalVM (coming soon)
 1. Spring Boot with Java 11 (coming soon)
 1. Spring Boot with GraalVM (coming soon)
-1. [Rust (no frameworks)](plain-java11)
+1. [Rust (no frameworks)](plain-rust1_49)
 
 A summary will be included here, Once I have a better picture of how these technologies compare, when it comes to serverless (AWS Lambda and DynamoDB).
