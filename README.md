@@ -14,8 +14,6 @@ The scope of the project is to create the same serverless application using diff
 1. [Rust 1.49 (no frameworks)](plain-rust1_49)
 1. [Go Lang 1.56 (no frameworks)](plain-go1_15)
 
-A summary will be included here, Once I have a better picture of how these technologies compare, when it comes to serverless (AWS Lambda and DynamoDB).
-
 All application used the same Lambda memory, 512 MB.
 
 | Technology                                                                |    Size | Memory Used | First Time | Best Time |
