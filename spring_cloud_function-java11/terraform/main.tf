@@ -55,8 +55,9 @@ resource "aws_lambda_function" "unique_code" {
 
   environment {
     variables = {
-      NAME = "Demo - Unique Codes Serverless Application"
-      DEMO = "true"
+      NAME          = "Demo - Unique Codes Serverless Application"
+      DEMO          = "true"
+      FUNCTION_NAME = "UniqueCode"
     }
   }
 

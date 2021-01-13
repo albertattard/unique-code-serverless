@@ -9,19 +9,21 @@ The scope of the project is to create the same serverless application using diff
 1. Micronaut with GraalVM (coming soon)
 1. Quarkus with Java 11 (coming soon)
 1. Quarkus with GraalVM (coming soon)
-1. Spring Boot with Java 11 (coming soon)
+1. [Spring Cloud Function + Boot with Java 11](spring_cloud_function-java11)
 1. Spring Boot with GraalVM (coming soon)
 1. [Rust 1.49 (no frameworks)](plain-rust1_49)
 
 A summary will be included here, Once I have a better picture of how these technologies compare, when it comes to serverless (AWS Lambda and DynamoDB).
 
-| Technology                                  |    Size | Memory Allocated | Memory Used | First Time | Best Time |
-| ------------------------------------------- | ------: | ---------------: | ----------: | ---------: | --------: |
-| [Java 11 (no frameworks)](plain-java11)     | 11.2 MB |           512 MB |      149 MB |    5817 ms |     69 ms |
-| [Micronaut with Java 11](micronaut-java11)  | 18.4 MB |           512 MB |      212 MB |    5817 ms |     88 ms |
-| Micronaut with GraalVM                      |         |                  |             |            |           |
-| Quarkus with Java 11                        |         |                  |             |            |           |
-| Quarkus with GraalVM                        |         |                  |             |            |           |
-| Spring Boot with Java 11                    |         |                  |             |            |           |
-| Spring Boot with GraalVM                    |         |                  |             |            |           |
-| [Rust 1.49 (no frameworks)](plain-rust1_49) |  4.6 MB |           512 MB |       37 MB |     219 ms |     48 ms |
+All application used the same Lambda memory, 512 MB.
+
+| Technology                                                                |    Size | Memory Used | First Time | Best Time |
+| ------------------------------------------------------------------------- | ------: | ----------: | ---------: | --------: |
+| [Java 11 (no frameworks)](plain-java11)                                   | 11.2 MB |      149 MB |    5817 ms |     69 ms |
+| [Micronaut with Java 11](micronaut-java11)                                | 18.4 MB |      212 MB |    5817 ms |     88 ms |
+| Micronaut with GraalVM                                                    |         |             |            |           |
+| Quarkus with Java 11                                                      |         |             |            |           |
+| Quarkus with GraalVM                                                      |         |             |            |           |
+| [Spring Cloud Function + Boot with Java 11](spring_cloud_function-java11) | 28.1 MB |      214 MB |   25728 ms |    213 ms |
+| Spring Boot with GraalVM                                                  |         |             |            |           |
+| [Rust 1.49 (no frameworks)](plain-rust1_49)                               |  4.6 MB |       37 MB |     219 ms |     48 ms |
