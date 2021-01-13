@@ -2,49 +2,28 @@
 
 A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify entities within an application. The serverless application features the following technologies.
 
-1. Rust 1.49
+1. Go Lang
 1. AWS Lambda Functions
 1. DynamoDB
 
 **Note that this demo does not use any frameworks**.
 
-I have no Rust skills and the code shown here can be improved. Please don't use as is.
-
 ## Conclusion
 
 Pending
 
+Still need to setup integration tests.
+
 ## Useful resources
 
-- [https://aws.amazon.com/blogs/opensource/rust-runtime-for-aws-lambda/](https://aws.amazon.com/blogs/opensource/rust-runtime-for-aws-lambda/)
-- [https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html](https://doc.rust-lang.org/edition-guide/rust-2018/platform-and-target-support/musl-support-for-fully-static-binaries.html)
+- [https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html](https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html)
 
 ## Commands
 
 1. Build application
 
-   Initially I tried to use cross compiler to compile the code that can be deployed as AWS lambda. This did not work out and was giving me issues. An alternative option was to use Docker to build the code instead. Created a simple docker image (`plain-rust1_49/builder/Dockerfile`) that builds the application can creates a ZIP file at `plain-rust1_49/target/x86_64-unknown-linux-musl/release/bootstrap.zip`. Then I use terraform to deploy this file on AWS.
-
-   Build the container. Only need to do it once.
-
    ```bash
-   $ docker build . -f builder/Dockerfile -t plain-rust1_49-builder:local
-   ```
-
-   Run the image.
-
-   ```bash
-   $ docker run --rm \
-     -v $(pwd):/home/rust/src \
-     -v ${HOME}/.cargo/registry:/home/rust/.cargo/registry \
-     -v ${HOME}/.cargo/git:/home/rust/.cargo/git \
-     -it plain-rust1_49-builder:local
-   ```
-
-   I am mounting several directories to cash artefacts from previous builds, speeding up following builds. For convenience, there is a `build.sh` script which simply runs the above command.
-
-   ```bash
-   ./build.sh
+   $ ./build.sh
    ```
 
 1. Set the AWS profile that will be used
@@ -282,8 +261,8 @@ Pending
 
 | Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
 | -------------------- | ----------: | ----------: | ----------: | ----------: | ----------: |
-| Init duration        |    38.01 ms |           - |           - |           - |           - |
-| Duration             |   180.55 ms |    61.86 ms |    47.33 ms |    57.27 ms |    62.01 ms |
-| Billed duration      |   219.00 ms |    62.00 ms |    48.00 ms |    58.00 ms |    63.00 ms |
+| Init duration        |    98.50 ms |           - |           - |           - |           - |
+| Duration             |   229.01 ms |    24.08 ms |     4.56 ms |     5.14 ms |     4.95 ms |
+| Billed duration      |   230.00 ms |    25.00 ms |     5.00 ms |     6.00 ms |     5.00 ms |
 | Resources configured |      512 MB |      512 MB |      512 MB |      512 MB |      512 MB |
-| Max memory used      |       36 MB |       37 MB |       37 MB |       37 MB |       37 MB |
+| Max memory used      |       47 MB |       48 MB |       48 MB |       48 MB |       48 MB |

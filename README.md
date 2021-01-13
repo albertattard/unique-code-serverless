@@ -12,6 +12,7 @@ The scope of the project is to create the same serverless application using diff
 1. [Spring Cloud Function + Boot with Java 11](spring_cloud_function-java11)
 1. Spring Boot with GraalVM (coming soon)
 1. [Rust 1.49 (no frameworks)](plain-rust1_49)
+1. [Go Lang 1.56 (no frameworks)](plain-go1_15)
 
 A summary will be included here, Once I have a better picture of how these technologies compare, when it comes to serverless (AWS Lambda and DynamoDB).
 
@@ -27,3 +28,4 @@ All application used the same Lambda memory, 512 MB.
 | [Spring Cloud Function + Boot with Java 11](spring_cloud_function-java11) | 28.1 MB |      214 MB |   25728 ms |    213 ms |
 | Spring Boot with GraalVM                                                  |         |             |            |           |
 | [Rust 1.49 (no frameworks)](plain-rust1_49)                               |  4.6 MB |       37 MB |     219 ms |     48 ms |
+| [Go Lang 1.56 (no frameworks)](plain-go1_15)                              |  6.5 MB |       48 MB |     230 ms |      5 ms |

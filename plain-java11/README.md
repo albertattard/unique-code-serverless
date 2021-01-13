@@ -1,7 +1,6 @@
 # Unique Code Serverless Application
 
-A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify
-entities within an application. The serverless application features the following technologies.
+A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify entities within an application. The serverless application features the following technologies.
 
 1. Java 11
 1. Gradle
