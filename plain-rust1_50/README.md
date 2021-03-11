@@ -33,7 +33,7 @@ Pending
    Build the container. Only need to do it once.
 
    ```bash
-   $ docker build . -f builder/Dockerfile -t plain-rust1_49-builder:local
+   $ docker build . -f builder/Dockerfile -t plain-rust1_50-builder:local
    ```
 
    Run the image.
@@ -43,7 +43,7 @@ Pending
      -v $(pwd):/home/rust/src \
      -v ${HOME}/.cargo/registry:/home/rust/.cargo/registry \
      -v ${HOME}/.cargo/git:/home/rust/.cargo/git \
-     -it plain-rust1_49-builder:local
+     -it plain-rust1_50-builder:local
    ```
 
    I am mounting several directories to cash artefacts from previous builds, speeding up following builds. For
