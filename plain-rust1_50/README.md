@@ -1,8 +1,9 @@
 # Unique Code Serverless Application
 
-A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify entities within an application. The serverless application features the following technologies.
+A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify
+entities within an application. The serverless application features the following technologies.
 
-1. Rust 1.49
+1. Rust 1.50
 1. AWS Lambda Functions
 1. DynamoDB
 
@@ -23,7 +24,11 @@ Pending
 
 1. Build application
 
-   Initially I tried to use cross compiler to compile the code that can be deployed as AWS lambda. This did not work out and was giving me issues. An alternative option was to use Docker to build the code instead. Created a simple docker image (`plain-rust1_49/builder/Dockerfile`) that builds the application can creates a ZIP file at `plain-rust1_49/target/x86_64-unknown-linux-musl/release/bootstrap.zip`. Then I use terraform to deploy this file on AWS.
+   Initially I tried to use cross compiler to compile the code that can be deployed as AWS lambda. This did not work out
+   and was giving me issues. An alternative option was to use Docker to build the code instead. Created a simple docker
+   image (`plain-rust1_50/builder/Dockerfile`) that builds the application and creates a ZIP file
+   at `plain-rust1_50/target/x86_64-unknown-linux-musl/release/bootstrap.zip`. Then I use terraform to deploy this file
+   on AWS.
 
    Build the container. Only need to do it once.
 
@@ -41,7 +46,8 @@ Pending
      -it plain-rust1_49-builder:local
    ```
 
-   I am mounting several directories to cash artefacts from previous builds, speeding up following builds. For convenience, there is a `build.sh` script which simply runs the above command.
+   I am mounting several directories to cash artefacts from previous builds, speeding up following builds. For
+   convenience, there is a `build.sh` script which simply runs the above command.
 
    ```bash
    ./build.sh
@@ -101,7 +107,8 @@ Pending
 
    Please note that the account id is masked `000000000000` and needs to be replaced by a valid account id.
 
-   The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's beyond the scope of this demo.
+   The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's
+   beyond the scope of this demo.
 
 1. Verify access to AWS console
 
@@ -140,13 +147,15 @@ Pending
    status code: 400, request id: 9HOFPEUK893E8PM15B388LSGC3VV4KQNSO5AEMVJF66Q9ASUAAJG
    ```
 
-   This seems to be a known issue and nothing to worry about ([reference](https://github.com/hashicorp/terraform-provider-aws/issues/10304)).
+   This seems to be a known issue and nothing to worry
+   about ([reference](https://github.com/hashicorp/terraform-provider-aws/issues/10304)).
 
 1. Configure the Lambda test event
 
    Create a test template, if one does not already exist.
 
-   Select the _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`) template and update it as shown next. No need to modify the `headers`.
+   Select the _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`) template and update it as shown next. No need to
+   modify the `headers`.
 
    ```json
    {
@@ -276,7 +285,8 @@ Pending
    $ terraform destroy
    ```
 
-   Once completed, double check through the AWS console to make sure that all the resources, including the logs were deleted.
+   Once completed, double check through the AWS console to make sure that all the resources, including the logs were
+   deleted.
 
 ## Performance
 
