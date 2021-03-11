@@ -35,7 +35,6 @@ fn handle_request(_request: CreateUniqueCodeRequest, _context: Context) -> Resul
         .map(char::from)
         .take(8)
         .collect();
-    println!("Random chars: {}", code);
 
     let mut item: HashMap<String, AttributeValue> = HashMap::new();
     item.insert(String::from("Code"), AttributeValue { s: Some(code.clone()), ..Default::default() });

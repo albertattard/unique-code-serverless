@@ -1,4 +1,4 @@
-FROM ekidd/rust-musl-builder:1.49.0 AS builder
+FROM ekidd/rust-musl-builder:1.50.0 AS builder
 RUN sudo apt-get update && sudo apt-get install zip -y
 
 CMD cargo build --release \

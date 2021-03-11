@@ -9,7 +9,7 @@ entities within an application. The serverless application features the followin
 
 **Note that this demo does not use any frameworks**.
 
-I have no Rust skills and the code shown here can be improved. Please don't use as is.
+I have no Rust skills, and the code shown here may not be production ready. Please don't use as is.
 
 ## Conclusion
 
@@ -30,32 +30,39 @@ Pending
    at `plain-rust1_50/target/x86_64-unknown-linux-musl/release/bootstrap.zip`. Then I use terraform to deploy this file
    on AWS.
 
-   Build the container. Only need to do it once.
+   Build the container. Only need to do it once as this is simply creating an image that will be used to compile the
+   application.
 
-   ```bash
+   ```console
    $ docker build . -f builder/Dockerfile -t plain-rust1_50-builder:local
    ```
 
-   Run the image.
+   Run the image to compile and build the project.
 
-   ```bash
+   ```console
    $ docker run --rm \
-     -v $(pwd):/home/rust/src \
-     -v ${HOME}/.cargo/registry:/home/rust/.cargo/registry \
-     -v ${HOME}/.cargo/git:/home/rust/.cargo/git \
+     -v "$(pwd):/home/rust/src" \
+     -v "${HOME}/.cargo/registry:/home/rust/.cargo/registry" \
+     -v "${HOME}/.cargo/git:/home/rust/.cargo/git" \
      -it plain-rust1_50-builder:local
    ```
 
    I am mounting several directories to cash artefacts from previous builds, speeding up following builds. For
    convenience, there is a `build.sh` script which simply runs the above command.
 
-   ```bash
+   ```console
    ./build.sh
    ```
 
-1. Set the AWS profile that will be used
+1. Set the AWS profile that will be used to deploy the application.
 
-   ```bash
+   Note that the lambda function has tighter access control as it only allowed access to specific resources, such as the
+   DynamoDB table being used. Please refer to the [`terraform/main.tf` terraform script](terraform/main.tf) for more
+   information about this.
+
+   Set the profile to be used to deploy the application
+
+   ```console
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
@@ -65,6 +72,12 @@ Pending
    {
      "Version": "2012-10-17",
      "Statement": [
+       {
+         "Sid": "DemoDynamoDbListAllTables",
+         "Effect": "Allow",
+         "Action": ["dynamodb:ListTables"],
+         "Resource": "arn:aws:dynamodb:eu-central-1:000000000000:table/*"
+       },
        {
          "Sid": "DemoDynamoDbFullAccess",
          "Effect": "Allow",
@@ -110,11 +123,23 @@ Pending
    The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's
    beyond the scope of this demo.
 
+   Please note that the following policy is not required to deploy the application and can be removed. It is only needed
+   to test the connection to AWS by listing all DynamoDb tables.
+
+   ```json
+       {
+         "Sid": "DemoDynamoDbListAllTables",
+         "Effect": "Allow",
+         "Action": ["dynamodb:ListTables"],
+         "Resource": "arn:aws:dynamodb:eu-central-1:000000000000:table/*"
+       }
+   ```
+
 1. Verify access to AWS console
 
    List all DynamoDB Tables
 
-   ```bash
+   ```console
    $ aws dynamodb list-tables
    ```
 
@@ -126,17 +151,25 @@ Pending
    }
    ```
 
+   Kindly note that for this command to work, the profile we are using need to be able to list the DynamoDb tables.
+
 1. Create the infrastructure
+
+   The following commands needs to be executed from within the `terraform` directory.
+
+   ```console
+   $ cd terraform
+   ```
 
    Initialize the environment if not already done.
 
-   ```bash
+   ```console
    $ terraform init
    ```
 
    Apply the changes
 
-   ```bash
+   ```console
    $ terraform apply
    ```
 
@@ -247,7 +280,7 @@ Pending
 
 1. Run the Lambda test
 
-   The first time Lambda is executed will take about 10 seconds as the Lambda function is being prepared.
+   The first time Lambda is executed may take upto 10 seconds as the Lambda function is being prepared.
 
    ![Successful Initial Lambda Test](assets/images/Successful-Initial-Lambda-Test.png)
 
@@ -279,9 +312,9 @@ Pending
 
 1. Cleanup resources from AWS
 
-   When done, it is a good idea to delete any resources from AWS that are not required any more.
+   When done, it is a good idea to delete any resources from AWS that are not required anymore.
 
-   ```bash
+   ```console
    $ terraform destroy
    ```
 
@@ -293,7 +326,7 @@ Pending
 | Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
 | -------------------- | ----------: | ----------: | ----------: | ----------: | ----------: |
 | Init duration        |    38.01 ms |           - |           - |           - |           - |
-| Duration             |   180.55 ms |    61.86 ms |    47.33 ms |    57.27 ms |    62.01 ms |
-| Billed duration      |   219.00 ms |    62.00 ms |    48.00 ms |    58.00 ms |    63.00 ms |
+| Duration             |   180.55 ms |    37.09 ms |    44.82 ms |    48.20 ms |    37.39 ms |
+| Billed duration      |   219.00 ms |    38.00 ms |    45.00 ms |    49.00 ms |    38.00 ms |
 | Resources configured |      512 MB |      512 MB |      512 MB |      512 MB |      512 MB |
-| Max memory used      |       36 MB |       37 MB |       37 MB |       37 MB |       37 MB |
+| Max memory used      |       36 MB |       36 MB |       36 MB |       36 MB |       36 MB |
