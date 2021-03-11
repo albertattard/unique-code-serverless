@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version("6.1.0")
     id("com.dorongold.task-tree") version("1.5")
+    id("com.github.ben-manes.versions") version("0.38.0")
 }
 
 java {
@@ -24,20 +25,20 @@ configurations {
 
 dependencies {
     /* Lombok */
-    def lombokVersion = "1.18.16"
+    def lombokVersion = "1.18.18"
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     /* DynamoDB */
-    def dynamoDbVersion = "2.15.61"
-    def dynamoDbLocalVersion = "1.13.5"
+    def dynamoDbVersion = "2.16.16"
+    def dynamoDbLocalVersion = "1.15.0"
     implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
     testImplementation("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
     dynamodb(fileTree(dir: "lib", include: ["*.dylib", "*.so", "*.dll"]))
     dynamodb("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
 
     /* Micronaut Framework */
-    def micronautVersion = "2.2.3"
+    def micronautVersion = "2.3.2"
     annotationProcessor(platform("io.micronaut:micronaut-bom:${micronautVersion}"))
     annotationProcessor("io.micronaut:micronaut-inject-java")
     implementation(platform("io.micronaut:micronaut-bom:${micronautVersion}"))
@@ -50,12 +51,11 @@ dependencies {
     testAnnotationProcessor(enforcedPlatform("io.micronaut:micronaut-bom:${micronautVersion}"))
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")
     testImplementation(enforcedPlatform("io.micronaut:micronaut-bom:${micronautVersion}"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.0-M1")
 
     /* Testing */
-    def assertJVersion = "3.18.1"
+    def assertJVersion = "3.19.0"
     testImplementation("org.assertj:assertj-core:${assertJVersion}")
 }
 
