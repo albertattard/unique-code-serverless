@@ -54,13 +54,13 @@ Pending
    ./build.sh
    ```
 
-1. Set the AWS profile that will be used to deploy the application.
+1. Set the AWS profile that will be used to deploy the lambda function.
 
    Note that the lambda function has tighter access control as it only allowed access to specific resources, such as the
    DynamoDB table being used. Please refer to the [`terraform/main.tf` terraform script](terraform/main.tf) for more
    information about this.
 
-   Set the profile to be used to deploy the application
+   Set the profile to be used to deploy the lambda function
 
    ```console
    $ export AWS_PROFILE="albertattard-demo"
@@ -123,8 +123,8 @@ Pending
    The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's
    beyond the scope of this demo.
 
-   Please note that the following policy is not required to deploy the application and can be removed. It is only needed
-   to test the connection to AWS by listing all DynamoDb tables.
+   Please note that the following policy is not required to deploy the lambda function and can be removed. It is only
+   needed to test the connection to AWS by listing all DynamoDb tables.
 
    ```json
        {
@@ -155,7 +155,7 @@ Pending
 
 1. Create the infrastructure
 
-   The following commands needs to be executed from within the `terraform` directory.
+   The following terraform commands needs to be executed from within the `terraform` directory.
 
    ```console
    $ cd terraform

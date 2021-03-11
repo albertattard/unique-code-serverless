@@ -1,6 +1,7 @@
 # Unique Code Serverless Application
 
-A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify entities within an application. The serverless application features the following technologies.
+A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify
+entities within an application. The serverless application features the following technologies.
 
 1. Java 11
 1. Gradle
@@ -11,7 +12,8 @@ A serverless application that uses AWS Lambda Functions and DynamoDB to create u
 
 ## Conclusion
 
-I was not able to test the Lambda function and also mock the services due to a known limitation ([reference](https://github.com/micronaut-projects/micronaut-test/issues/330)).
+I was not able to test the Lambda function and also mock the services due to a known
+limitation ([reference](https://github.com/micronaut-projects/micronaut-test/issues/330)).
 
 ## Useful resources
 
@@ -26,7 +28,13 @@ I was not able to test the Lambda function and also mock the services due to a k
    $ ./gradlew clean test shadowJar
    ```
 
-1. Set the AWS profile that will be used
+1. Set the AWS profile that will be used to deploy the lambda function.
+
+   Note that the lambda function has tighter access control as it only allowed access to specific resources, such as the
+   DynamoDB table being used. Please refer to the [`terraform/main.tf` terraform script](terraform/main.tf) for more
+   information about this.
+
+   Set the profile to be used to deploy the lambda function
 
    ```bash
    $ export AWS_PROFILE="albertattard-demo"
@@ -38,6 +46,12 @@ I was not able to test the Lambda function and also mock the services due to a k
    {
      "Version": "2012-10-17",
      "Statement": [
+       {
+         "Sid": "DemoDynamoDbListAllTables",
+         "Effect": "Allow",
+         "Action": ["dynamodb:ListTables"],
+         "Resource": "arn:aws:dynamodb:eu-central-1:000000000000:table/*"
+       },
        {
          "Sid": "DemoDynamoDbFullAccess",
          "Effect": "Allow",
@@ -80,7 +94,20 @@ I was not able to test the Lambda function and also mock the services due to a k
 
    Please note that the account id is masked `000000000000` and needs to be replaced by a valid account id.
 
-   The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's beyond the scope of this demo.
+   The policy grants admin access to the resources used by this demo. Further restrictions can be applied, but it's
+   beyond the scope of this demo.
+
+   Please note that the following policy is not required to deploy the lambda function and can be removed. It is only
+   needed to test the connection to AWS by listing all DynamoDb tables.
+
+   ```json
+       {
+         "Sid": "DemoDynamoDbListAllTables",
+         "Effect": "Allow",
+         "Action": ["dynamodb:ListTables"],
+         "Resource": "arn:aws:dynamodb:eu-central-1:000000000000:table/*"
+       }
+   ```
 
 1. Verify access to AWS console
 
@@ -98,7 +125,15 @@ I was not able to test the Lambda function and also mock the services due to a k
    }
    ```
 
+   Kindly note that for this command to work, the profile we are using need to be able to list the DynamoDb tables.
+
 1. Create the infrastructure
+
+   The following terraform commands needs to be executed from within the `terraform` directory.
+
+   ```console
+   $ cd terraform
+   ```
 
    Initialize the environment if not already done.
 
@@ -119,13 +154,15 @@ I was not able to test the Lambda function and also mock the services due to a k
    status code: 400, request id: 9HOFPEUK893E8PM15B388LSGC3VV4KQNSO5AEMVJF66Q9ASUAAJG
    ```
 
-   This seems to be a known issue and nothing to worry about ([reference](https://github.com/hashicorp/terraform-provider-aws/issues/10304)).
+   This seems to be a known issue and nothing to worry
+   about ([reference](https://github.com/hashicorp/terraform-provider-aws/issues/10304)).
 
 1. Configure the Lambda test event
 
    Create a test template, if one does not already exist.
 
-   Select the _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`) template and update it as shown next. No need to modify the `headers`.
+   Select the _Amazon API Gateway AWS Proxy_ (`apigateway-aws-proxy`) template and update it as shown next. No need to
+   modify the `headers`.
 
    ```json
    {
@@ -255,7 +292,8 @@ I was not able to test the Lambda function and also mock the services due to a k
    $ terraform destroy
    ```
 
-   Once completed, double check through the AWS console to make sure that all the resources, including the logs were deleted.
+   Once completed, double check through the AWS console to make sure that all the resources, including the logs were
+   deleted.
 
 ## Performance
 
