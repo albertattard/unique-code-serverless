@@ -1,0 +1,3 @@
+#!/bin/sh
+set -euo pipefail
+./unique-code-serverless -Xmx512m "-Djava.library.path=$(pwd)"

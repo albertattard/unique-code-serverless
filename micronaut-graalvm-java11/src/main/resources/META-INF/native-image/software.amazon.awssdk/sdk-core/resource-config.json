@@ -1,0 +1,10 @@
+{
+  "resources": [
+    {
+      "pattern": "software/amazon/awssdk/services/\\w+/execution.interceptors"
+    },
+    {
+      "pattern": "software/amazon/awssdk/.*"
+    }
+  ]
+}
