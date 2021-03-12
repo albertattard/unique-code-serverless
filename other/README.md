@@ -20,13 +20,13 @@ Useful resources
 
 1. Build application
 
-   ```bash
+   ```console
    $ ./gradlew clean test shadowJar
    ```
 
 1. Set the AWS profile that will be used
 
-   ```bash
+   ```console
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
@@ -50,7 +50,7 @@ Useful resources
 
    List all DynamoDB Tables
 
-   ```bash
+   ```console
    $ aws dynamodb list-tables
    ```
 
@@ -66,13 +66,13 @@ Useful resources
 
    Initialize the environment if not already done.
 
-   ```bash
+   ```console
    $ terraform init
    ```
 
    Apply the changes
 
-   ```bash
+   ```console
    $ terraform fmt -recursive && terraform apply
    ```
 

@@ -24,7 +24,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
 1. Build application
 
-   ```bash
+   ```console
    $ ./gradlew clean test shadowJar
    ```
 
@@ -36,7 +36,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
    Set the profile to be used to deploy the lambda function
 
-   ```bash
+   ```console
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
@@ -113,7 +113,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
    List all DynamoDB Tables
 
-   ```bash
+   ```console
    $ aws dynamodb list-tables
    ```
 
@@ -137,13 +137,13 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
    Initialize the environment if not already done.
 
-   ```bash
+   ```console
    $ terraform init
    ```
 
    Apply the changes
 
-   ```bash
+   ```console
    $ terraform apply
    ```
 
@@ -288,7 +288,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
    When done, it is a good idea to delete any resources from AWS that are not required any more.
 
-   ```bash
+   ```console
    $ terraform destroy
    ```
 

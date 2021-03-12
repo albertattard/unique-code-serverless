@@ -24,13 +24,13 @@ Still need to setup integration tests.
 
 1. Build application
 
-   ```bash
+   ```console
    $ ./gradlew clean test shadowJar
    ```
 
 1. Set the AWS profile that will be used
 
-   ```bash
+   ```console
    $ export AWS_PROFILE="albertattard-demo"
    ```
 
@@ -88,7 +88,7 @@ Still need to setup integration tests.
 
    List all DynamoDB Tables
 
-   ```bash
+   ```console
    $ aws dynamodb list-tables
    ```
 
@@ -104,13 +104,13 @@ Still need to setup integration tests.
 
    Initialize the environment if not already done.
 
-   ```bash
+   ```console
    $ terraform init
    ```
 
    Apply the changes
 
-   ```bash
+   ```console
    $ terraform apply
    ```
 
@@ -253,7 +253,7 @@ Still need to setup integration tests.
 
    When done, it is a good idea to delete any resources from AWS that are not required any more.
 
-   ```bash
+   ```console
    $ terraform destroy
    ```
 
