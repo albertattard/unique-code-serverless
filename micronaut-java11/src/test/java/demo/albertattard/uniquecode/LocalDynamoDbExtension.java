@@ -30,7 +30,7 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
     private DynamoDBProxyServer server;
 
     @Override
-    public void afterAll(ExtensionContext extensionContext) throws Exception {
+    public void afterAll(ExtensionContext extensionContext) {
         deleteTable();
         stopUnchecked(server);
     }
@@ -121,12 +121,14 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         }
     }
 
-    protected void stopUnchecked(DynamoDBProxyServer dynamoDbServer) {
+    private static void stopUnchecked(final DynamoDBProxyServer dynamoDbServer) {
         LOGGER.debug("Stopping DynamoDB locally on port {}", portNumber);
-        try {
-            dynamoDbServer.stop();
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
+        if (dynamoDbServer != null) {
+            try {
+                dynamoDbServer.stop();
+            } catch (final Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

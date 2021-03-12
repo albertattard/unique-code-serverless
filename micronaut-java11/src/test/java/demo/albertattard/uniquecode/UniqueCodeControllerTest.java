@@ -9,6 +9,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.function.aws.proxy.MicronautLambdaHandler;
+import io.micronaut.function.aws.test.annotation.MicronautLambdaTest;
 import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpMethod;
 import io.micronaut.http.HttpStatus;
@@ -24,11 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@MicronautTest
+@MicronautLambdaTest
 @ExtendWith(LocalDynamoDbExtension.class)
 class UniqueCodeControllerTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UniqueCodeControllerTest.class);
 
     private static final Context lambdaContext = new MockLambdaContext();
     private static MicronautLambdaHandler handler;
@@ -42,7 +41,7 @@ class UniqueCodeControllerTest {
     // CodeGenerationService codeGenerationService;
 
     @BeforeAll
-    public static void setupSpec() {
+    static void setupSpec() {
         try {
             handler = new MicronautLambdaHandler();
             objectMapper = handler.getApplicationContext().getBean(ObjectMapper.class);
@@ -52,7 +51,7 @@ class UniqueCodeControllerTest {
     }
 
     @AfterAll
-    public static void cleanupSpec() {
+    static void cleanupSpec() {
         if (handler != null) {
             handler.getApplicationContext().close();
         }
