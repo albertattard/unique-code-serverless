@@ -326,7 +326,7 @@ Pending
 | Measurement          | 1st Request | 2nd Request | 3rd Request | 4th Request | 5th Request |
 | -------------------- | ----------: | ----------: | ----------: | ----------: | ----------: |
 | Init duration        |    38.01 ms |           - |           - |           - |           - |
-| Duration             |   180.55 ms |    37.09 ms |    44.82 ms |    48.20 ms |    37.39 ms |
-| Billed duration      |   219.00 ms |    38.00 ms |    45.00 ms |    49.00 ms |    38.00 ms |
+| Duration             |   180.55 ms |    37.09 ms |    44.82 ms |    34.78 ms |    37.39 ms |
+| Billed duration      |   219.00 ms |    38.00 ms |    45.00 ms |    35.00 ms |    38.00 ms |
 | Resources configured |      512 MB |      512 MB |      512 MB |      512 MB |      512 MB |
 | Max memory used      |       36 MB |       36 MB |       36 MB |       36 MB |       36 MB |

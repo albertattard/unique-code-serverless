@@ -18,6 +18,7 @@ simple-error = "0.2.2"
 futures = "0.3.9"
 tokio = { version = "1.0.1", features = ["full"] }
 rand = "0.8.1"
+regex = "1"
 
 [[bin]]
 name = "bootstrap"
