@@ -3,12 +3,17 @@
 A serverless application that uses AWS Lambda Functions and DynamoDB to create unique code that can be used to identify
 entities within an application. The serverless application features the following technologies.
 
+1. GraalVM
+1. Docker (for building)
 1. Java 11
 1. Gradle
 1. Micronaut Framework
 1. AWS Lambda Functions
 1. DynamoDB
 1. LocalDynamoDb (for testing)
+
+This repository used the same code from the [`micronaut-java11` repository](../micronaut-java11) and only added things
+required by GraalVM.
 
 ## Conclusion
 
