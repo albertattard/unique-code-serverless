@@ -1,95 +1,106 @@
 package demo.albertattard.uniquecode;
 
-import com.amazonaws.serverless.exceptions.ContainerInitializationException;
-import com.amazonaws.serverless.proxy.internal.testutils.AwsProxyRequestBuilder;
-import com.amazonaws.serverless.proxy.internal.testutils.MockLambdaContext;
-import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
-import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.function.aws.proxy.MicronautLambdaHandler;
-import io.micronaut.function.aws.test.annotation.MicronautLambdaTest;
-import io.micronaut.http.HttpHeaders;
-import io.micronaut.http.HttpMethod;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.MediaType;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mockito.verification.VerificationMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
-@MicronautLambdaTest
-@ExtendWith(LocalDynamoDbExtension.class)
-class UniqueCodeControllerTest {
+@DisplayName("Unique code controller test")
+public class UniqueCodeControllerTest {
 
-    private static final Context lambdaContext = new MockLambdaContext();
-    private static MicronautLambdaHandler handler;
-    private static ObjectMapper objectMapper;
+    @Test
+    @DisplayName("should create and save the code for the given blank request")
+    void shouldCreateAndSaveTheCodeForTheGivenBlankRequest() {
+        final DataAccessGateway gateway = mock(DataAccessGateway.class);
+        final CodeGenerationService codeGenerationService = mock(CodeGenerationService.class);
+        final ClockService clockService = mock(ClockService.class);
 
-    /*
-     * TODO: Cannot mock the services as yet, as @MicronautTest is incomplete.
-     *  Reference: https://github.com/micronaut-projects/micronaut-test/issues/330
-     */
-    // @Inject
-    // CodeGenerationService codeGenerationService;
+        final CreateUniqueCodeRequest request = new CreateUniqueCodeRequest();
+        final CreateUniqueCode createUniqueCode = CreateUniqueCode.builder(request)
+                .createdOn("2077-04-27T12:34:56+01:00[Europe/Berlin]")
+                .code("12345678")
+                .build();
 
-    @BeforeAll
-    static void setupSpec() {
-        try {
-            handler = new MicronautLambdaHandler();
-            objectMapper = handler.getApplicationContext().getBean(ObjectMapper.class);
-        } catch (ContainerInitializationException e) {
-            throw new RuntimeException("Failed to initialise the container", e);
-        }
-    }
+        when(clockService.createdOn()).thenReturn(createUniqueCode.getCreatedOn());
+        when(codeGenerationService.generate(anyInt())).thenReturn(createUniqueCode.getCode());
+        when(gateway.saveUniqueCode(any())).thenReturn(true);
 
-    @AfterAll
-    static void cleanupSpec() {
-        if (handler != null) {
-            handler.getApplicationContext().close();
-        }
+        final UniqueCodeController controller = new UniqueCodeController(gateway, codeGenerationService, clockService);
+        final UniqueCode uniqueCode = controller.create(request);
+
+        assertThat(uniqueCode)
+                .as("generated code")
+                .isNotNull()
+                .extracting(UniqueCode::getCode)
+                .isEqualTo(createUniqueCode.getCode());
+
+        verify(clockService, times(1)).createdOn();
+        verify(codeGenerationService, times(1)).generate(eq(request.getLength()));
+        verify(gateway, times(1)).saveUniqueCode(eq(createUniqueCode));
+        verifyNoMoreInteractions(clockService, codeGenerationService, gateway);
     }
 
     @Test
-    @DisplayName("should return a new random code with default length when a blank request is made")
-    void shouldReturnANewRandomCodeWithDefaultLengthWhenABlankRequestIsMade() throws JsonProcessingException {
-        final String json = objectMapper.writeValueAsString(new CreateUniqueCodeRequest());
+    @DisplayName("should attempt again when a collision is encountered")
+    void shouldAttemptAgainWhenACollisionIsEncountered() {
+        final DataAccessGateway gateway = mock(DataAccessGateway.class);
+        final CodeGenerationService codeGenerationService = mock(CodeGenerationService.class);
+        final ClockService clockService = mock(ClockService.class);
 
-        // final String expectedCode = "12345678";
-        // when(codeGenerationService.generate(CreateUniqueCodeRequest.DEFAULT_LENGTH)).thenReturn(expectedCode);
-
-        final AwsProxyRequest request = new AwsProxyRequestBuilder("/", HttpMethod.POST.toString())
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .body(json)
+        final String existingCode = "AAAAAAAA";
+        final CreateUniqueCodeRequest request = new CreateUniqueCodeRequest();
+        final CreateUniqueCode createUniqueCode = CreateUniqueCode.builder(request)
+                .createdOn("2077-04-27T12:34:56+01:00[Europe/Berlin]")
+                .code("12345678")
                 .build();
-        final AwsProxyResponse response = handler.handleRequest(request, lambdaContext);
-        assertThat(response.getStatusCode())
-                .isEqualTo(HttpStatus.OK.getCode());
 
-        final UniqueCode uniqueCode = objectMapper.readValue(response.getBody(), UniqueCode.class);
+        when(clockService.createdOn()).thenReturn(createUniqueCode.getCreatedOn());
+        when(codeGenerationService.generate(anyInt())).thenReturn(existingCode).thenReturn(createUniqueCode.getCode());
+        when(gateway.saveUniqueCode(any())).thenReturn(false).thenReturn(true);
+
+        final UniqueCodeController controller = new UniqueCodeController(gateway, codeGenerationService, clockService);
+        final UniqueCode uniqueCode = controller.create(request);
+
         assertThat(uniqueCode)
-                .isNotNull();
-
-        final String code = uniqueCode.getCode();
-        assertThat(code)
-                // .isEqualTo(expectedCode)
-                .describedAs("Code must contains a mix of %d capital letters and numbers only", CreateUniqueCodeRequest.DEFAULT_LENGTH)
+                .as("generated code")
                 .isNotNull()
-                .matches("[A-Z0-9]{" + CreateUniqueCodeRequest.DEFAULT_LENGTH + "}")
-        ;
+                .extracting("code")
+                .isEqualTo(createUniqueCode.getCode());
 
-        // verify(codeGenerationService).generate(CreateUniqueCodeRequest.DEFAULT_LENGTH);
+        verify(clockService, times(1)).createdOn();
+        verify(codeGenerationService, times(2)).generate(eq(request.getLength()));
+        verify(gateway, times(1)).saveUniqueCode(eq(createUniqueCode.withCode(existingCode)));
+        verify(gateway, times(1)).saveUniqueCode(eq(createUniqueCode));
+        verifyNoMoreInteractions(clockService, codeGenerationService, gateway);
     }
 
-    // @MockBean(RandomCodeGenerationService.class)
-    // CodeGenerationService codeGenerationService() {
-    //     return mock(CodeGenerationService.class);
-    // }
+    @Test
+    @DisplayName("should throw an exception when it fails to create a unique code after five attempts")
+    void shouldThrowAnExceptionWhenItFailsToCreateAUniqueCodeAfterFiveAttempts() {
+        final DataAccessGateway gateway = mock(DataAccessGateway.class);
+        final CodeGenerationService codeGenerationService = mock(CodeGenerationService.class);
+        final ClockService clockService = mock(ClockService.class);
+
+        final CreateUniqueCodeRequest request = new CreateUniqueCodeRequest();
+        final CreateUniqueCode createUniqueCode = CreateUniqueCode.builder(request)
+                .createdOn("2077-04-27T12:34:56+01:00[Europe/Berlin]")
+                .code("AAAAAAAA")
+                .build();
+
+        when(clockService.createdOn()).thenReturn(createUniqueCode.getCreatedOn());
+        when(codeGenerationService.generate(anyInt())).thenReturn(createUniqueCode.getCode());
+        when(gateway.saveUniqueCode(any())).thenReturn(false);
+
+        final UniqueCodeController controller = new UniqueCodeController(gateway, codeGenerationService, clockService);
+        assertThrows(RuntimeException.class, () -> controller.create(request));
+
+        verify(clockService, times(1)).createdOn();
+        verify(codeGenerationService, times(5)).generate(eq(request.getLength()));
+        verify(gateway, times(5)).saveUniqueCode(eq(createUniqueCode));
+        verifyNoMoreInteractions(clockService, codeGenerationService, gateway);
+    }
 }

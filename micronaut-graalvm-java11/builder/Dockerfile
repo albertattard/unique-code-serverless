@@ -1,7 +1,8 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # Build the lambda funciton/application and produces a JAR file
 # ----------------------------------------------------------------------------------------------------------------------
-FROM gradle:6.8.3-jdk11 as builder
+FROM adoptopenjdk/openjdk11:x86_64-alpine-jdk-11.0.10_9 as builder
+
 WORKDIR /home/application
 COPY --chown=gradle:gradle ../gradle gradle
 COPY --chown=gradle:gradle ../gradlew gradlew
@@ -9,6 +10,7 @@ COPY --chown=gradle:gradle ../settings.gradle settings.gradle
 COPY --chown=gradle:gradle ../build.gradle build.gradle
 COPY --chown=gradle:gradle ../bootstrap bootstrap
 COPY --chown=gradle:gradle ../src src
+
 RUN ./gradlew shadowJar --no-daemon
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -36,6 +38,7 @@ CMD ["/usr/lib/graalvm/bin/native-image"]
 # Created the native image
 # ----------------------------------------------------------------------------------------------------------------------
 FROM graalvm
+
 WORKDIR /home/application
 COPY --from=builder /home/application/ /home/application/
 
