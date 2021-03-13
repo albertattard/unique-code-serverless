@@ -1,11 +1,12 @@
 use crate::clock::ClockService;
 use crate::random_code::RandomCodeService;
-use lambda_runtime::{error::HandlerError, lambda, Context};
+use lambda_runtime::{handler_fn, Context, Error};
 use rusoto_core::Region;
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, PutItemInput};
+use serde::Deserializer;
 use serde_derive::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::HashMap;
-use std::error::Error;
 use tokio::runtime::Runtime;
 
 #[derive(Deserialize, Debug)]
@@ -22,26 +23,27 @@ struct UniqueCode {
     code: String,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    lambda!(handle_request);
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let func = handler_fn(handle_request);
+    lambda_runtime::run(func).await?;
     Ok(())
 }
 
-fn handle_request(
-    request: CreateUniqueCodeRequest,
-    _context: Context,
-) -> Result<UniqueCode, HandlerError> {
-    println!("Request {:?}", request);
+async fn handle_request(event: Value, _: Context) -> Result<UniqueCode, Error> {
+    let request: CreateUniqueCodeRequest = serde_json::from_value(event["body"].clone()).unwrap();
+    println!("{:?}", request);
+
     let random_code_service = RandomCodeService::new();
     let clock_service = ClockService::new();
-    create_random_code(random_code_service, clock_service, request)
+    create_random_code(random_code_service, clock_service, request).await
 }
 
-fn create_random_code(
+async fn create_random_code(
     random_code_service: RandomCodeService,
     clock_service: ClockService,
     request: CreateUniqueCodeRequest,
-) -> Result<UniqueCode, HandlerError> {
+) -> Result<UniqueCode, Error> {
     let code = random_code_service.random_string(request.length.unwrap_or(8));
     let createdOn = clock_service.createdOn();
 
@@ -70,16 +72,10 @@ fn create_random_code(
     };
 
     let client: DynamoDbClient = DynamoDbClient::new(Region::EuCentral1);
-    let result = Runtime::new()
-        .expect("Failed to create Tokio runtime")
-        .block_on(client.put_item(put_item));
-
-    match result {
-        Ok(_) => Ok(UniqueCode {
-            code: String::from(code),
-        }),
-        Err(_) => Err(HandlerError::from("Failed to save code")),
-    }
+    client.put_item(put_item).await?;
+    Ok(UniqueCode {
+        code: code.to_owned(),
+    })
 }
 
 mod clock {
