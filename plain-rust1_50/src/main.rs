@@ -3,7 +3,6 @@ use crate::random_code::RandomCodeService;
 use lambda_runtime::{handler_fn, Context, Error};
 use rusoto_core::Region;
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, PutItemInput};
-use serde::Deserializer;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -90,6 +89,19 @@ mod clock {
         pub fn created_on(&self) -> String {
             let now: DateTime<Utc> = Utc::now();
             now.to_rfc3339()
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_created_on() {
+            let service = ClockService::new();
+            let created_on = service.created_on();
+            let parsed = DateTime::parse_from_rfc3339(&created_on);
+            assert!(parsed.is_ok());
         }
     }
 }
