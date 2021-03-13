@@ -7,7 +7,6 @@ use serde::Deserializer;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
-use tokio::runtime::Runtime;
 
 #[derive(Deserialize, Debug)]
 struct CreateUniqueCodeRequest {
@@ -45,7 +44,7 @@ async fn create_random_code(
     request: CreateUniqueCodeRequest,
 ) -> Result<UniqueCode, Error> {
     let code = random_code_service.random_string(request.length.unwrap_or(8));
-    let createdOn = clock_service.createdOn();
+    let created_on = clock_service.created_on();
 
     let mut item: HashMap<String, AttributeValue> = HashMap::new();
     item.insert(
@@ -58,7 +57,7 @@ async fn create_random_code(
     item.insert(
         String::from("CreatedOn"),
         AttributeValue {
-            s: Some(createdOn),
+            s: Some(created_on),
             ..Default::default()
         },
     );
@@ -79,6 +78,8 @@ async fn create_random_code(
 }
 
 mod clock {
+    use chrono::{DateTime, Utc};
+
     pub struct ClockService {}
 
     impl ClockService {
@@ -86,8 +87,9 @@ mod clock {
             ClockService {}
         }
 
-        pub fn createdOn(&self) -> String {
-            "".to_owned()
+        pub fn created_on(&self) -> String {
+            let now: DateTime<Utc> = Utc::now();
+            now.to_rfc3339()
         }
     }
 }
