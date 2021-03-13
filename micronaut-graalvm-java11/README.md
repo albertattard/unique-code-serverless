@@ -17,8 +17,11 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
 ## Useful resources
 
+- [https://guides.micronaut.io/mn-application-aws-lambda-graalvm/guide/index.html](https://guides.micronaut.io/mn-application-aws-lambda-graalvm/guide/index.html)
 - [https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambda](https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambda) ([source](https://github.com/micronaut-guides/mn-application-aws-lambda-java11/tree/master/complete))
 - [https://byegor.github.io/2020/04/10/micronaut-dynamodb-async.html](https://byegor.github.io/2020/04/10/micronaut-dynamodb-async.html)
+- [https://github.com/oracle/graal/issues/979](https://github.com/oracle/graal/issues/979)
+- [https://www.youtube.com/watch?v=OSyvidFXL7M](https://www.youtube.com/watch?v=OSyvidFXL7M)
 
 ## Commands
 
@@ -34,9 +37,9 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
    Error: Image build request failed with exit status 137
    ```
 
-   Exit status 137 indicates an out of memory error, even though the nothing is mentioned in the error description.
+   Exit status 137 indicates an out of memory error, even though nothing is mentioned in the error description.
 
-   Create the native image
+   Create the native image using docker
 
    ```console
    $ docker build . -f builder/Dockerfile -t micronaut-graalvm-java11-builder
@@ -335,6 +338,14 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
 ## Notes
 
-The `resource-config.json` as part of the `sdk-core` is badly formatted and causes the native image build to fail. I've
-replaced the one found in the library with an equivalent one and saved it
-at `src/main/resources/META-INF/native-image/software.amazon.awssdk/sdk-core/resource-config.json`.
+1. **Issue with AWS sdk-core**
+
+   The `resource-config.json` as part of the `sdk-core` is badly formatted and causes the native image build to fail.
+   I've replaced the one found in the library with an equivalent one and saved it
+   at `src/main/resources/META-INF/native-image/software.amazon.awssdk/sdk-core/resource-config.json`.
+
+1. **Performance**
+
+   The performance of the GraalVM as shown in this example is worse than the same code running on the JVM. Others have
+   observed similar behaviour ([reference](https://github.com/oracle/graal/issues/979)). Further investigation is
+   required.
