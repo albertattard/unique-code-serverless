@@ -30,7 +30,6 @@ async fn main() -> Result<(), Error> {
 
 async fn handle_request(event: Value, _: Context) -> Result<UniqueCode, Error> {
     let request: CreateUniqueCodeRequest = serde_json::from_value(event["body"].clone()).unwrap();
-    println!("{:?}", request);
 
     let random_code_service = RandomCodeService::new();
     let clock_service = ClockService::new();
@@ -60,6 +59,33 @@ async fn create_random_code(
             ..Default::default()
         },
     );
+    if request.used_by.is_some() {
+        item.insert(
+            String::from("UsedBy"),
+            AttributeValue {
+                s: Some(request.used_by.unwrap()),
+                ..Default::default()
+            },
+        );
+    }
+    if request.reference.is_some() {
+        item.insert(
+            String::from("Reference"),
+            AttributeValue {
+                s: Some(request.reference.unwrap()),
+                ..Default::default()
+            },
+        );
+    }
+    if request.description.is_some() {
+        item.insert(
+            String::from("Description"),
+            AttributeValue {
+                s: Some(request.description.unwrap()),
+                ..Default::default()
+            },
+        );
+    }
 
     let put_item = PutItemInput {
         table_name: "UniqueCodes".to_string(),
