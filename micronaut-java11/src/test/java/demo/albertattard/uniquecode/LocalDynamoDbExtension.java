@@ -8,24 +8,25 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.SystemPropertyCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
-import software.amazon.awssdk.services.dynamodb.model.ReturnConsumedCapacity;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalDynamoDbExtension.class);
 
-    private static final String portNumber = "8000";
-    private static final URI endpoint = URI.create(String.format("http://localhost:%s", portNumber));
+    private static final String PORT_NUMBER = "8000";
+    private static final URI ENDPOINT = URI.create(String.format("http://localhost:%s", PORT_NUMBER));
 
     private DynamoDBProxyServer server;
 
@@ -41,16 +42,15 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         setupPropertiesNeededByAwsApi();
         startLocalDynamoDBServer();
         createTable();
-        populateTableWithDummyValues();
     }
 
     private void startLocalDynamoDBServer() throws Exception {
-        LOGGER.debug("Starting DynamoDB locally on port {}", portNumber);
-        this.server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", portNumber});
+        LOGGER.debug("Starting DynamoDB locally on port {}", PORT_NUMBER);
+        this.server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", PORT_NUMBER});
         server.start();
     }
 
-    private void setupPropertiesNeededBySqlite4Java() {
+    private static void setupPropertiesNeededBySqlite4Java() {
         LOGGER.debug("Setting up the Sqlite 4 system properties");
 
         /*
@@ -60,7 +60,7 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         System.setProperty("sqlite4java.library.path", "build/libs");
     }
 
-    private void setupPropertiesNeededByAwsApi() {
+    private static void setupPropertiesNeededByAwsApi() {
         LOGGER.debug("Setting up the AWS API system properties");
 
         /*
@@ -73,7 +73,7 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
     }
 
     @SuppressWarnings("unchecked")
-    public void createTable() {
+    private static void createTable() {
         LOGGER.debug("Creating DynamoDB table");
         /* This needs to match what we defined in the terraform files */
         withClient(client ->
@@ -87,32 +87,23 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         );
     }
 
-    public void populateTableWithDummyValues() {
-        LOGGER.debug("Populating DynamoDB table");
+    private static void withClient(final Consumer<DynamoDbClient> consumer) {
+        consumer.accept(createDynamoDbClient());
+    }
 
-        final Map<String, AttributeValue> item = new HashMap<>();
-        item.put("Code", AttributeValue.builder().s("12345678").build());
+    private static <T> T withClientReturn(final Function<DynamoDbClient, T> consumer) {
+        return consumer.apply(createDynamoDbClient());
+    }
 
-        withClient(client ->
-                client.putItem(builder -> builder
-                        .tableName("UniqueCodes")
-                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
-                        .item(item)
-                        .conditionExpression("attribute_not_exists(Code)")
-                        .build()
-                )
+    public static List<Map<String, AttributeValue>> scanAllItems() {
+        return withClientReturn(client ->
+                client.scan(builder -> builder
+                        .tableName("UniqueCodes"))
+                        .items()
         );
     }
 
-    private void withClient(final Consumer<DynamoDbClient> consumer) {
-        final DynamoDbClient client = DynamoDbClient.builder()
-                .endpointOverride(endpoint)
-                .credentialsProvider(SystemPropertyCredentialsProvider.create())
-                .build();
-        consumer.accept(client);
-    }
-
-    public void deleteTable() {
+    private static void deleteTable() {
         LOGGER.debug("Deleting DynamoDB table");
         try {
             withClient(client -> client.deleteTable(builder -> builder.tableName("UniqueCodes")));
@@ -122,7 +113,7 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
     }
 
     private static void stopUnchecked(final DynamoDBProxyServer dynamoDbServer) {
-        LOGGER.debug("Stopping DynamoDB locally on port {}", portNumber);
+        LOGGER.debug("Stopping DynamoDB locally on port {}", PORT_NUMBER);
         if (dynamoDbServer != null) {
             try {
                 dynamoDbServer.stop();
@@ -132,7 +123,11 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         }
     }
 
-    static URI endpoint() {
-        return endpoint;
+    public static DynamoDbClient createDynamoDbClient() {
+        return DynamoDbClient.builder()
+                .endpointOverride(ENDPOINT)
+                .credentialsProvider(SystemPropertyCredentialsProvider.create())
+                .region(Region.EU_CENTRAL_1)
+                .build();
     }
 }
