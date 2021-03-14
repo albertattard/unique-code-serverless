@@ -166,7 +166,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 
    ```json
    {
-     "body": "{}",
+     "body": {},
      "resource": "/",
      "path": "/",
      "httpMethod": "POST",

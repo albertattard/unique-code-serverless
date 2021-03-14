@@ -11,6 +11,7 @@ import java.util.Map;
 import static demo.albertattard.uniquecode.LocalDynamoDbExtension.createDynamoDbClient;
 import static demo.albertattard.uniquecode.LocalDynamoDbExtension.populateTableWithDummyValues;
 import static demo.albertattard.uniquecode.LocalDynamoDbExtension.scanAllItems;
+import static demo.albertattard.uniquecode.LocalDynamoDbExtension.toAttributeValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,9 +112,5 @@ class DataAccessGatewayIntegrationTest {
         final Map<String, AttributeValue> attributesByName = allDataInDynamoDb.get(0);
         assertThat(attributesByName).hasSize(1);
         assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttributeValue(createUniqueCode.getCode()));
-    }
-
-    private static AttributeValue toAttributeValue(String code) {
-        return AttributeValue.builder().s(code).build();
     }
 }

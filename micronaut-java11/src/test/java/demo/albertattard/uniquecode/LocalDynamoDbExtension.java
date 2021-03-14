@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.SystemPropertyCredentialsProvider;
+import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.ReturnConsumedCapacity;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +107,7 @@ public class LocalDynamoDbExtension implements BeforeEachCallback, AfterAllCallb
 
     public static void populateTableWithDummyValues(final String code) {
         final Map<String, AttributeValue> item = new HashMap<>();
-        item.put("Code", AttributeValue.builder().s(code).build());
+        item.put("Code", toAttributeValue(code));
 
         withClient(client ->
                 client.putItem(builder -> builder
@@ -150,9 +152,16 @@ public class LocalDynamoDbExtension implements BeforeEachCallback, AfterAllCallb
 
     public static DynamoDbClient createDynamoDbClient() {
         return DynamoDbClient.builder()
+                .region(Region.EU_CENTRAL_1)
                 .endpointOverride(ENDPOINT)
                 .credentialsProvider(SystemPropertyCredentialsProvider.create())
-                .region(Region.EU_CENTRAL_1)
+                .httpClientBuilder(UrlConnectionHttpClient.builder()
+                        .connectionTimeout(Duration.ofSeconds(2))
+                        .socketTimeout(Duration.ofSeconds(2)))
                 .build();
+    }
+
+    public static AttributeValue toAttributeValue(final String value) {
+        return AttributeValue.builder().s(value).build();
     }
 }

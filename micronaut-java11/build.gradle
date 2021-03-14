@@ -33,6 +33,7 @@ dependencies {
     def dynamoDbVersion = "2.16.18"
     def dynamoDbLocalVersion = "1.15.0"
     implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
+    implementation("software.amazon.awssdk:url-connection-client:${dynamoDbVersion}")
     testImplementation("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
     dynamodb(fileTree(dir: "lib", include: ["*.dylib", "*.so", "*.dll"]))
     dynamodb("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
