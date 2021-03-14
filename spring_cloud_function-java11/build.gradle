@@ -3,10 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.transformers.*
 plugins {
     id("java")
     id("application")
-    id("org.springframework.boot") version("2.4.1")
-    id("io.spring.dependency-management") version("1.0.10.RELEASE")
+    id("org.springframework.boot") version("2.4.3")
+    id("io.spring.dependency-management") version("1.0.11.RELEASE")
     id("com.github.johnrengelman.shadow") version("6.1.0")
     id("com.dorongold.task-tree") version("1.5")
+    id("com.github.ben-manes.versions") version("0.38.0")
 }
 
 java {
@@ -17,10 +18,18 @@ java {
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url "http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release"
+    }
 }
 
 ext {
     set("springCloudVersion", "2020.0.0")
+}
+
+configurations {
+    developmentOnly
+    dynamodb
 }
 
 dependencyManagement {
@@ -31,25 +40,37 @@ dependencyManagement {
 
 dependencies {
     /* Lombok */
-    def lombokVersion = "1.18.16"
+    def lombokVersion = "1.18.18"
     compileOnly("org.projectlombok:lombok:${lombokVersion}")
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     /* DynamoDB */
-    def dynamoDbVersion = "2.15.61"
+    def dynamoDbVersion = "2.16.18"
+    def dynamoDbLocalVersion = "1.15.0"
     implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
     implementation("software.amazon.awssdk:url-connection-client:${dynamoDbVersion}")
+    testImplementation("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
+    dynamodb(fileTree(dir: "lib", include: ["*.dylib", "*.so", "*.dll"]))
+    dynamodb("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")
 
     /* Lambda */
-    def lambdaVersion = "1.2.1"
-    implementation("com.amazonaws:aws-lambda-java-core:${lambdaVersion}")
-    implementation("com.amazonaws:aws-lambda-java-events:3.7.0");
+    def lambdaCoreVersion = "1.2.1"
+    def lambdaEventsVersion = "3.7.0"
+    implementation("com.amazonaws:aws-lambda-java-core:${lambdaCoreVersion}")
+    implementation("com.amazonaws:aws-lambda-java-events:${lambdaEventsVersion}");
 
     /* Spring Boot + Cloud Function */
+    def springCloudStarter = "3.0.1"
+    def springAdapterAws = "3.1.1"
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.cloud:spring-cloud-starter")
-    implementation("org.springframework.cloud:spring-cloud-function-adapter-aws")
+    implementation("org.springframework.cloud:spring-cloud-starter:${springCloudStarter}")
+    implementation("org.springframework.cloud:spring-cloud-function-adapter-aws:${springAdapterAws}")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+task copyNativeDeps(type: Copy) {
+    from(configurations.dynamodb)
+    into("$project.buildDir/libs")
 }
 
 test {
@@ -57,6 +78,13 @@ test {
     testLogging {
         events = ['FAILED', 'PASSED', 'SKIPPED', 'STANDARD_OUT']
     }
+    dependsOn copyNativeDeps
+    doFirst {
+        systemProperty "java.library.path", "build/libs"
+    }
+
+    // Required by the AWS API
+    environment "AWS_REGION", "eu-central-1"
 }
 
 mainClassName = "demo.albertattard.uniquecode.DemoApplication"
