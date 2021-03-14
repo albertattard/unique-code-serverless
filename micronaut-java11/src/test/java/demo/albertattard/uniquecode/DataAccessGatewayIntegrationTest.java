@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DataAccessGatewayIntegrationTest {
 
     @Test
-    @DisplayName("should save unique code and return true when the code does not already exists")
-    void shouldSaveUniqueCodeAndReturnTrueWhenTheCodeDoesNotAlreadyExists() {
+    @DisplayName("should save the unique code with minimum attributes and return true when the code does not already exists")
+    void shouldSaveTheUniqueCodeWithMinimumAttributesAndReturnTrueWhenTheCodeDoesNotAlreadyExists() {
         /* The DynamoDB table should be empty before the test */
         assertThat(scanAllItems())
                 .as("The local dynamo DB should be empty before the test")
@@ -43,8 +43,43 @@ class DataAccessGatewayIntegrationTest {
 
         final Map<String, AttributeValue> attributesByName = allDataInDynamoDb.get(0);
         assertThat(attributesByName).hasSize(2);
-        assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttribute(createUniqueCode.getCode()));
+        assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttributeValue(createUniqueCode.getCode()));
         assertThat(attributesByName.get("CreatedOn")).as("created on").isNotNull();
+    }
+
+    @Test
+    @DisplayName("should save the unique code with all attributes and return true when the code does not already exists")
+    void shouldSaveTheUniqueCodeWithAllAttributesAndReturnTrueWhenTheCodeDoesNotAlreadyExists() {
+        /* The DynamoDB table should be empty before the test */
+        assertThat(scanAllItems())
+                .as("The local dynamo DB should be empty before the test")
+                .isEmpty();
+
+        final CreateUniqueCodeRequest request = new CreateUniqueCodeRequest();
+        request.setUsedBy("used-by-test");
+        request.setReference("reference-test");
+        request.setDescription("description-test");
+        final CreateUniqueCode createUniqueCode = CreateUniqueCode.builder(request)
+                .createdOn("2077-04-27T12:34:56+01:00[Europe/Berlin]")
+                .code("12345678")
+                .build();
+
+        final DataAccessGateway dataAccessGateway = new DataAccessGateway(createDynamoDbClient());
+        final boolean successful = dataAccessGateway.saveUniqueCode(createUniqueCode);
+        assertTrue(successful);
+
+        final List<Map<String, AttributeValue>> allDataInDynamoDb = scanAllItems();
+        assertThat(allDataInDynamoDb)
+                .as("The local dynamo DB should have one item after the test run")
+                .hasSize(1);
+
+        final Map<String, AttributeValue> attributesByName = allDataInDynamoDb.get(0);
+        assertThat(attributesByName).hasSize(5);
+        assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttributeValue(createUniqueCode.getCode()));
+        assertThat(attributesByName.get("CreatedOn")).as("created on").isNotNull();
+        assertThat(attributesByName.get("UsedBy")).as("used by").isEqualTo(toAttributeValue(createUniqueCode.getUsedBy()));
+        assertThat(attributesByName.get("Reference")).as("reference").isEqualTo(toAttributeValue(createUniqueCode.getReference()));
+        assertThat(attributesByName.get("Description")).as("description").isEqualTo(toAttributeValue(createUniqueCode.getDescription()));
     }
 
     @Test
@@ -75,10 +110,10 @@ class DataAccessGatewayIntegrationTest {
 
         final Map<String, AttributeValue> attributesByName = allDataInDynamoDb.get(0);
         assertThat(attributesByName).hasSize(1);
-        assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttribute(createUniqueCode.getCode()));
+        assertThat(attributesByName.get("Code")).as("code").isEqualTo(toAttributeValue(createUniqueCode.getCode()));
     }
 
-    private static AttributeValue toAttribute(String code) {
+    private static AttributeValue toAttributeValue(String code) {
         return AttributeValue.builder().s(code).build();
     }
 }
