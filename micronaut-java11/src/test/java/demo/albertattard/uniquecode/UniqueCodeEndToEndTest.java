@@ -14,21 +14,18 @@ import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.HttpMethod;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static demo.albertattard.uniquecode.LocalDynamoDbExtension.scanAllItems;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @MicronautLambdaTest
 @ExtendWith(LocalDynamoDbExtension.class)
-class UniqueCodeControllerIntegrationTest {
+class UniqueCodeEndToEndTest {
 
     private static final Context lambdaContext = new MockLambdaContext();
     private static MicronautLambdaHandler handler;

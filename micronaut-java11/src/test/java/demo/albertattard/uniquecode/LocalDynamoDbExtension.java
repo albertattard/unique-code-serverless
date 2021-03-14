@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,15 +14,18 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.BillingMode;
 import software.amazon.awssdk.services.dynamodb.model.KeyType;
+import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.dynamodb.model.ReturnConsumedCapacity;
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallback {
+public class LocalDynamoDbExtension implements BeforeEachCallback, AfterAllCallback, BeforeAllCallback {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalDynamoDbExtension.class);
 
@@ -31,17 +35,21 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
     private DynamoDBProxyServer server;
 
     @Override
-    public void afterAll(ExtensionContext extensionContext) {
-        deleteTable();
-        stopUnchecked(server);
-    }
-
-    @Override
     public void beforeAll(final ExtensionContext extensionContext) throws Exception {
         setupPropertiesNeededBySqlite4Java();
         setupPropertiesNeededByAwsApi();
         startLocalDynamoDBServer();
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+        deleteTable();
         createTable();
+    }
+
+    @Override
+    public void afterAll(ExtensionContext extensionContext) {
+        stopUnchecked(server);
     }
 
     private void startLocalDynamoDBServer() throws Exception {
@@ -95,6 +103,21 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         return consumer.apply(createDynamoDbClient());
     }
 
+    public static void populateTableWithDummyValues(final String code) {
+        final Map<String, AttributeValue> item = new HashMap<>();
+        item.put("Code", AttributeValue.builder().s(code).build());
+
+        withClient(client ->
+                client.putItem(builder -> builder
+                        .tableName("UniqueCodes")
+                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
+                        .item(item)
+                        .conditionExpression("attribute_not_exists(Code)")
+                        .build()
+                )
+        );
+    }
+
     public static List<Map<String, AttributeValue>> scanAllItems() {
         return withClientReturn(client ->
                 client.scan(builder -> builder
@@ -107,6 +130,8 @@ public class LocalDynamoDbExtension implements AfterAllCallback, BeforeAllCallba
         LOGGER.debug("Deleting DynamoDB table");
         try {
             withClient(client -> client.deleteTable(builder -> builder.tableName("UniqueCodes")));
+        } catch (final ResourceNotFoundException e) {
+            /* The table did not exist */
         } catch (final RuntimeException e) {
             LOGGER.warn("Failed to delete the DynamoDB table", e);
         }
