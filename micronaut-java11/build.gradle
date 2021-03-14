@@ -30,7 +30,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     /* DynamoDB */
-    def dynamoDbVersion = "2.16.16"
+    def dynamoDbVersion = "2.16.18"
     def dynamoDbLocalVersion = "1.15.0"
     implementation("software.amazon.awssdk:dynamodb:${dynamoDbVersion}")
     testImplementation("com.amazonaws:DynamoDBLocal:${dynamoDbLocalVersion}")

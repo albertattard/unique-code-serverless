@@ -25,7 +25,7 @@ limitation ([reference](https://github.com/micronaut-projects/micronaut-test/iss
 1. Build application
 
    ```console
-   $ ./gradlew clean test shadowJar
+   $ ./gradlew clean check shadowJar
    ```
 
 1. Set the AWS profile that will be used to deploy the lambda function.
