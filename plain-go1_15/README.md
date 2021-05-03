@@ -129,7 +129,7 @@ Still need to setup integration tests.
 
    ```json
    {
-     "body": "{}",
+     "body": {},
      "resource": "/",
      "path": "/",
      "httpMethod": "POST",

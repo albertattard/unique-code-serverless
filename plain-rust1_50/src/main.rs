@@ -6,6 +6,7 @@ use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, PutItemInput};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use crate::data_access::{CreateUniqueCode, DataAccessGateway};
 
 #[derive(Deserialize, Debug)]
 struct CreateUniqueCodeRequest {
@@ -33,79 +34,146 @@ async fn handle_request(event: Value, _: Context) -> Result<UniqueCode, Error> {
 
     let random_code_service = RandomCodeService::new();
     let clock_service = ClockService::new();
-    create_random_code(random_code_service, clock_service, request).await
+    let data_access_gateway = DataAccessGateway::new();
+    create_random_code(random_code_service, clock_service, data_access_gateway, request).await
 }
 
 async fn create_random_code(
     random_code_service: RandomCodeService,
     clock_service: ClockService,
+    data_access_gateway: DataAccessGateway,
     request: CreateUniqueCodeRequest,
 ) -> Result<UniqueCode, Error> {
     let code = random_code_service.random_string(request.length.unwrap_or(8));
     let created_on = clock_service.created_on();
 
-    let mut item: HashMap<String, AttributeValue> = HashMap::new();
-    item.insert(
-        String::from("Code"),
-        AttributeValue {
-            s: Some(code.clone()),
-            ..Default::default()
-        },
-    );
-    item.insert(
-        String::from("CreatedOn"),
-        AttributeValue {
-            s: Some(created_on),
-            ..Default::default()
-        },
-    );
-    if request.used_by.is_some() {
-        item.insert(
-            String::from("UsedBy"),
-            AttributeValue {
-                s: Some(request.used_by.unwrap()),
-                ..Default::default()
-            },
-        );
-    }
-    if request.reference.is_some() {
-        item.insert(
-            String::from("Reference"),
-            AttributeValue {
-                s: Some(request.reference.unwrap()),
-                ..Default::default()
-            },
-        );
-    }
-    if request.description.is_some() {
-        item.insert(
-            String::from("Description"),
-            AttributeValue {
-                s: Some(request.description.unwrap()),
-                ..Default::default()
-            },
-        );
+    let create = CreateUniqueCode::new(code, created_on, request);
+    let successful = data_access_gateway.save(create);
+    if successful {
+        return Ok(UniqueCode {
+            code: code.to_owned(),
+        });
     }
 
-    let put_item = PutItemInput {
-        table_name: "UniqueCodes".to_string(),
-        return_consumed_capacity: None,
-        item,
-        condition_expression: Some(String::from("attribute_not_exists(Code)")),
-        ..Default::default()
-    };
+    Err(Error::from("Failed to create a unique code"))
+}
 
-    let client: DynamoDbClient = DynamoDbClient::new(Region::EuCentral1);
-    client.put_item(put_item).await?;
-    Ok(UniqueCode {
-        code: code.to_owned(),
-    })
+mod data_access {
+    use crate::CreateUniqueCodeRequest;
+    use rusoto_dynamodb::{AttributeValue, DynamoDbClient, PutItemInput, DynamoDb};
+    use std::collections::HashMap;
+    use std::error::Error;
+    use rusoto_core::Region;
+
+    pub struct DataAccessGateway;
+
+    pub struct CreateUniqueCode {
+        code: String,
+        created_on: String,
+        used_by: Option<String>,
+        reference: Option<String>,
+        description: Option<String>,
+    }
+
+    impl CreateUniqueCode {
+        pub fn new(
+            code: String,
+            created_on: String,
+            request: CreateUniqueCodeRequest,
+        ) -> CreateUniqueCode {
+            CreateUniqueCode {
+                code,
+                created_on,
+                used_by: request.used_by,
+                reference: request.reference,
+                description: request.description,
+            }
+        }
+
+        // pub fn with_code(&self, code: String) -> CreateUniqueCode {
+        //     CreateUniqueCode {
+        //         code,
+        //         created_on: &self.created_on,
+        //         used_by: &self.used_by,
+        //         reference: &self.reference,
+        //         description: &self.description,
+        //     }
+        // }
+
+        fn to_attributes_by_name(&self) -> HashMap<String, AttributeValue> {
+            let mut item: HashMap<String, AttributeValue> = HashMap::new();
+            item.insert(
+                String::from("Code"),
+                AttributeValue {
+                    s: Some((&self.code).clone()),
+                    ..Default::default()
+                },
+            );
+            item.insert(
+                String::from("CreatedOn"),
+                AttributeValue {
+                    s: Some((&self.created_on).clone()),
+                    ..Default::default()
+                },
+            );
+            if &self.used_by.is_some() {
+                item.insert(
+                    String::from("UsedBy"),
+                    AttributeValue {
+                        s: Some((&self.used_by).unwrap()),
+                        ..Default::default()
+                    },
+                );
+            }
+            if &self.reference.is_some() {
+                item.insert(
+                    String::from("Reference"),
+                    AttributeValue {
+                        s: Some((&self.reference).unwrap()),
+                        ..Default::default()
+                    },
+                );
+            }
+            if &self.description.is_some() {
+                item.insert(
+                    String::from("Description"),
+                    AttributeValue {
+                        s: Some((&self.description).unwrap()),
+                        ..Default::default()
+                    },
+                );
+            }
+
+            item
+        }
+    }
+
+    impl DataAccessGateway {
+        pub fn new() -> DataAccessGateway {
+            DataAccessGateway {}
+        }
+
+        pub async fn save(&self, create: CreateUniqueCode) -> Result<bool, Error> {
+            let put_item = PutItemInput {
+                table_name: "UniqueCodes".to_string(),
+                return_consumed_capacity: None,
+                item: create.to_attributes_by_name(),
+                condition_expression: Some(String::from("attribute_not_exists(Code)")),
+                ..Default::default()
+            };
+
+            let client: DynamoDbClient = DynamoDbClient::new(Region::EuCentral1);
+            client.put_item(put_item).await?;
+
+            Ok(true)
+        }
+    }
 }
 
 mod clock {
     use chrono::{DateTime, Utc};
 
-    pub struct ClockService {}
+    pub struct ClockService;
 
     impl ClockService {
         pub fn new() -> ClockService {
@@ -137,7 +205,7 @@ mod random_code {
     use rand::{thread_rng, Rng};
     use std::iter;
 
-    pub struct RandomCodeService {}
+    pub struct RandomCodeService;
 
     impl RandomCodeService {
         pub fn new() -> RandomCodeService {

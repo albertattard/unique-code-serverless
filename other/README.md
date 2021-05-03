@@ -89,7 +89,7 @@ Useful resources
 
    ```json
    {
-     "body": "{}",
+     "body": {},
      "resource": "/",
      "path": "/",
      "httpMethod": "POST",

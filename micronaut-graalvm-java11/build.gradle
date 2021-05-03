@@ -13,9 +13,7 @@ java {
 repositories {
     mavenCentral()
     jcenter()
-    maven {
-        url "http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release"
-    }
+    maven { url "http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release" }
 }
 
 configurations {

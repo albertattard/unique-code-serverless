@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version("6.1.0")
     id("com.dorongold.task-tree") version("1.5")
+    id("com.github.ben-manes.versions") version("0.38.0")
 }
 
 java {
@@ -12,6 +13,7 @@ java {
 repositories {
     mavenCentral()
     jcenter()
+    maven { url "http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release" }
 }
 
 dependencies {
